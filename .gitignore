@@ -1,0 +1,14 @@
+/dist
+dist
+/node_modules
+/.cache
+/.idea
+/.jest-cache
+/.vscode
+/coverage
+/test-reports
+/of_tmp
+/.DS_Store
+/.env
+/.env.test
+.jest-cache
