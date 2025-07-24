@@ -1,0 +1,104 @@
+{
+  "name": "openflow-nodejs-sdk",
+  "version": "0.0.1-pre-alpha",
+  "description": "Open protocol for AI LLM flow development (Under development)",
+  "author": "Berkay Zelyurt <zelyurtberkay@gmail.com>",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "bin": {
+    "openflow": "dist/cli.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "jest",
+    "test:unit": "jest --selectProjects \"Unit Tests\"",
+    "test:integration": "jest --selectProjects \"Integration Tests\"",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "test:verbose": "jest --verbose",
+    "test:silent": "jest --silent",
+    "test:ci": "jest --ci --coverage --watchAll=false",
+    "lint": "eslint . --ext .ts,.js --fix",
+    "format": "prettier --write \"**/*.{ts,js,json,md}\"",
+    "clean": "rimraf dist/ coverage/ test-reports/ .jest-cache/",
+    "prepare": "npm run build",
+    "prepack": "npm run build",
+    "validate": "npm run lint && npm run test:ci",
+    "docs": "typedoc --out docs src/index.ts",
+    "example:01": "npx ts-node examples/01-basic-llm.ts",
+    "example:02": "npx ts-node examples/02-conditional-logic.ts",
+    "example:03": "npx ts-node examples/03-for-each-loop.ts",
+    "example:04": "npx ts-node examples/04-image-analysis.ts",
+    "example:05": "npx ts-node examples/05-pdf-processing.ts",
+    "example:06": "npx ts-node examples/06-embed-and-store.ts",
+    "example:07": "npx ts-node examples/07-vector-search.ts",
+    "example:08": "npx ts-node examples/08-hooks-example.ts",
+    "example:09": "npx ts-node examples/09-mcp-deepwiki.ts",
+    "example:10": "npx ts-node examples/10-mcp-semgrep.ts",
+    "example:11": "npx ts-node examples/11-mcp-coingecko.ts"
+  },
+  "keywords": [
+    "ai",
+    "llm",
+    "workflow",
+    "automation",
+    "typescript",
+    "flow",
+    "protocol"
+  ],
+  "license": "GPL-3.0-or-later",
+  "licenses": [
+    {
+      "type": "GPL-3.0-or-later",
+      "url": "https://www.gnu.org/licenses/gpl-3.0.en.html"
+    }
+  ],
+  "devDependencies": {
+    "@types/jest": "^29.5.14",
+    "@types/node": "^20.11.17",
+    "@typescript-eslint/eslint-plugin": "^6.21.0",
+    "@typescript-eslint/parser": "^6.21.0",
+    "eslint": "^8.56.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-prettier": "^5.5.1",
+    "jest": "^29.7.0",
+    "jest-html-reporters": "^3.1.7",
+    "jest-junit": "^16.0.0",
+    "prettier": "^3.2.5",
+    "rimraf": "^5.0.5",
+    "ts-jest": "^29.4.0",
+    "ts-node": "^10.9.2",
+    "tsx": "^4.20.3",
+    "typedoc": "^0.25.13",
+    "typescript": "^5.3.3"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE.md"
+  ],
+  "dependencies": {
+    "@pinecone-database/pinecone": "^6.1.1",
+    "@types/uuid": "^10.0.0",
+    "axios": "^1.6.7",
+    "dotenv": "^16.4.1",
+    "pdf2image": "^1.2.3",
+    "sharp": "^0.33.5",
+    "uuid": "^11.1.0"
+  },
+  "peerDependencies": {
+    "typescript": ">=4.5.0"
+  },
+  "optionalDependencies": {
+    "canvas": "^2.11.2"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=8.0.0"
+  },
+  "bugs": {
+    "url": "https://github.com/berkayz/openflow-nodejs-sdk/issues"
+  },
+  "homepage": "https://github.com/berkayz/openflow-nodejs-sdk#readme"
+}
