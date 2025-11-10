@@ -30,44 +30,6 @@ export class GrokProvider extends BaseProvider {
     }
   }
 
-  private buildOutputInstructions(outputSchema: OutputSchema): string {
-    if (!outputSchema || Object.keys(outputSchema).length === 0) {
-      return "";
-    }
-
-    let instructions = "\n\n" + "=".repeat(80);
-    instructions += "\n🚨 CRITICAL: STRICT JSON SCHEMA ENFORCEMENT";
-    instructions += "\n" + "=".repeat(80);
-    instructions +=
-      "\nYou MUST return your response as a valid JSON object with the following structure:\n";
-
-    for (const [key, property] of Object.entries(outputSchema)) {
-      instructions += `\n"${key}": ${property.description || "No description provided"} (type: ${property.type})`;
-    }
-
-    instructions += "\n\nExample format:";
-    const schemaExample: any = {};
-    for (const [key, property] of Object.entries(outputSchema)) {
-      if (property.type === "string") {
-        schemaExample[key] = `A detailed ${property.description || "response"}`;
-      } else if (property.type === "number") {
-        schemaExample[key] = 0;
-      } else if (property.type === "boolean") {
-        schemaExample[key] = true;
-      } else {
-        schemaExample[key] = null;
-      }
-    }
-
-    instructions += JSON.stringify(schemaExample, null, 2);
-    instructions += "\n\n" + "=".repeat(80);
-    instructions +=
-      "\n🎯 RESPOND WITH ONLY THE JSON OBJECT - PROVIDE ACTUAL ANALYSIS, NOT EXAMPLE VALUES";
-    instructions += "\n" + "=".repeat(80);
-
-    return instructions;
-  }
-
   async generateCompletion(
     messages: LLMMessage[],
     outputSchema: OutputSchema,
@@ -82,7 +44,7 @@ export class GrokProvider extends BaseProvider {
       const textContent = userMessage.content.find((c) => c.type === "text");
       const textToEnhance = textContent?.text || "";
 
-      const outputInstructions = this.buildOutputInstructions(outputSchema);
+      const outputInstructions = PromptBuilder.buildOutputInstructions(outputSchema);
       const enhancedPrompt = textToEnhance + outputInstructions;
 
       // Create new multimodal content with enhanced text
