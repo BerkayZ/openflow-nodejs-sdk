@@ -24,7 +24,7 @@ export class PromptBuilder {
     return prompt;
   }
 
-  private static buildOutputInstructions(outputSchema: OutputSchema): string {
+  static buildOutputInstructions(outputSchema: OutputSchema): string {
     let instructions = "\n\n" + "=".repeat(80);
     instructions += "\n🚨 CRITICAL: STRICT JSON SCHEMA ENFORCEMENT";
     instructions += "\n" + "=".repeat(80);
