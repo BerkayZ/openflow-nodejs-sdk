@@ -38,7 +38,10 @@ export class VectorSearchNodeExecutor extends BaseNode {
     this.log(context, "debug", `Resolved input:`, resolvedInput);
 
     // Prepare search parameters
-    const searchParams = this.prepareSearchParams(resolvedInput, resolvedConfig);
+    const searchParams = this.prepareSearchParams(
+      resolvedInput,
+      resolvedConfig,
+    );
     this.log(context, "debug", `Search parameters:`, searchParams);
 
     // Get provider configuration
