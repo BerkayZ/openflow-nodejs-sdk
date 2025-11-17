@@ -188,9 +188,20 @@ export interface ForEachNode extends BaseNode {
 export interface UpdateVariableNode extends BaseNode {
   type: NodeType.UPDATE_VARIABLE;
   config: {
-    type: "join" | "update" | "append";
+    type: "join" | "update" | "append" | "extract" | "pick" | "omit" | "map" | "filter" | "slice" | "flatten" | "concat";
     variable_id: string;
     join_str?: string;
+    field_path?: string;        // For extract: "text", "metadata.title"
+    fields?: string[];          // For pick/omit: ["text", "doc_id"]
+    mapping?: Record<string, any>; // For transform operations
+    condition?: {               // For filter operations
+      field: string;
+      operator: "equals" | "contains" | "greater_than" | "less_than" | "not_equals";
+      value: any;
+    };
+    slice_start?: number;       // For slice operations
+    slice_end?: number;
+    stringify_output?: boolean; // Whether to JSON.stringify the output (default: true for join/append, false for others)
   };
   value: string | object; // Variable reference or JSON object
 }

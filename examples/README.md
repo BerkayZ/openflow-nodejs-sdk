@@ -81,6 +81,70 @@ await executor.executeFlow(flow, {
 
 This approach provides better separation between flow logic and runtime data, making flows more reusable and testable.
 
+## Variable Manipulation Operations
+
+The SDK now supports comprehensive variable manipulation operations for professional array and object transformations:
+
+### Basic Operations
+
+- **`update`** - Replace variable value completely
+- **`join`** - Concatenate values with optional separator
+- **`append`** - Add value to array
+
+### Array Operations
+
+- **`extract`** - Extract specific fields from object arrays
+  ```typescript
+  // [{text: "hello", id: "1"}] → ["hello"]
+  { type: "extract", field_path: "text" }
+  ```
+
+- **`map`** - Transform array elements with custom mapping
+  ```typescript
+  { type: "map", mapping: { "content": "text", "source": "id" } }
+  ```
+
+- **`filter`** - Filter array elements by conditions
+  ```typescript
+  { type: "filter", condition: { field: "score", operator: "greater_than", value: 0.8 } }
+  ```
+
+- **`slice`** - Get subset of array
+  ```typescript
+  { type: "slice", slice_start: 0, slice_end: 3 }
+  ```
+
+- **`flatten`** - Flatten nested arrays
+- **`concat`** - Concatenate arrays together
+
+### Object Operations
+
+- **`pick`** - Select specific properties from objects
+  ```typescript
+  // [{text: "hello", id: "1"}] → [{text: "hello"}]
+  { type: "pick", fields: ["text"] }
+  ```
+
+- **`omit`** - Remove specific properties from objects
+  ```typescript
+  { type: "omit", fields: ["id", "metadata"] }
+  ```
+
+### Advanced Features
+
+- **Nested field access**: Use dot notation (`metadata.title`, `results[0].score`)
+- **Condition operators**: `equals`, `not_equals`, `contains`, `greater_than`, `less_than`
+- **Variable resolution**: All config fields support `{{variable}}` syntax
+- **Type safety**: Comprehensive error handling for invalid operations
+- **Output stringification control**: Use `stringify_output: false` to preserve objects as objects instead of converting to JSON strings
+  ```typescript
+  // Keep objects as objects (default for most operations)
+  { type: "pick", fields: ["text"], stringify_output: false }
+
+  // Convert output to JSON strings (default for join/append)
+  { type: "append", stringify_output: true }
+  ```
+
 ## Configuration
 
 All examples require proper API keys configured in the FlowExecutorConfig:
