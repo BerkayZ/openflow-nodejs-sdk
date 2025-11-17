@@ -30,7 +30,6 @@ export class OpenAIProvider extends BaseProvider {
     }
   }
 
-
   private convertMessagesToOpenAIFormat(
     messages: LLMMessage[],
     outputSchema: OutputSchema,
@@ -82,7 +81,8 @@ export class OpenAIProvider extends BaseProvider {
         // Handle multimodal messages
         const textContent = lastMessage.content.find((c) => c.type === "text");
         const textToEnhance = textContent?.text || "";
-        const outputInstructions = PromptBuilder.buildOutputInstructions(outputSchema);
+        const outputInstructions =
+          PromptBuilder.buildOutputInstructions(outputSchema);
         const enhancedPrompt = textToEnhance + outputInstructions;
 
         enhancedContent = lastMessage.content.map((content) => {

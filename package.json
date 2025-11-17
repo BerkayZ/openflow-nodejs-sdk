@@ -37,7 +37,8 @@
     "example:09": "npx ts-node examples/09-mcp-deepwiki.ts",
     "example:10": "npx ts-node examples/10-mcp-semgrep.ts",
     "example:11": "npx ts-node examples/11-mcp-coingecko.ts",
-    "example:12": "npx ts-node examples/12-rag-chat.ts"
+    "example:12": "npx ts-node examples/12-rag-chat.ts",
+    "example:13": "npx ts-node examples/13-document-chat.ts"
   },
   "keywords": [
     "ai",

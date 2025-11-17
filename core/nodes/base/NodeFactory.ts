@@ -27,14 +27,17 @@ export class NodeFactory {
    * Register node executors
    */
   static {
-    NodeFactory.register("LLM", LLMNodeExecutor);
-    NodeFactory.register("UPDATE_VARIABLE", UpdateVariableNodeExecutor);
-    NodeFactory.register("VECTOR_INSERT", VectorInsertNodeExecutor);
-    NodeFactory.register("VECTOR_SEARCH", VectorSearchNodeExecutor);
-    NodeFactory.register("TEXT_EMBEDDING", TextEmbeddingNodeExecutor);
-    NodeFactory.register("CONDITION", ConditionNodeExecutor);
-    NodeFactory.register("DOCUMENT_SPLITTER", DocumentSplitterNodeExecutor);
-    NodeFactory.register("FOR_EACH", ForEachNodeExecutor);
+    NodeFactory.register(NodeType.LLM, LLMNodeExecutor);
+    NodeFactory.register(NodeType.UPDATE_VARIABLE, UpdateVariableNodeExecutor);
+    NodeFactory.register(NodeType.VECTOR_INSERT, VectorInsertNodeExecutor);
+    NodeFactory.register(NodeType.VECTOR_SEARCH, VectorSearchNodeExecutor);
+    NodeFactory.register(NodeType.TEXT_EMBEDDING, TextEmbeddingNodeExecutor);
+    NodeFactory.register(NodeType.CONDITION, ConditionNodeExecutor);
+    NodeFactory.register(
+      NodeType.DOCUMENT_SPLITTER,
+      DocumentSplitterNodeExecutor,
+    );
+    NodeFactory.register(NodeType.FOR_EACH, ForEachNodeExecutor);
 
     // Future node types will be registered here:
     // NodeFactory.register('VECTOR_UPDATE', VectorUpdateNodeExecutor);

@@ -44,7 +44,8 @@ export class GrokProvider extends BaseProvider {
       const textContent = userMessage.content.find((c) => c.type === "text");
       const textToEnhance = textContent?.text || "";
 
-      const outputInstructions = PromptBuilder.buildOutputInstructions(outputSchema);
+      const outputInstructions =
+        PromptBuilder.buildOutputInstructions(outputSchema);
       const enhancedPrompt = textToEnhance + outputInstructions;
 
       // Create new multimodal content with enhanced text
