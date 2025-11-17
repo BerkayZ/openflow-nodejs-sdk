@@ -72,7 +72,16 @@ export abstract class BaseNode {
   ): string {
     return text.replace(/\{\{([^}]+)\}\}/g, (match, expression) => {
       const value = registry.resolveExpression(expression.trim());
-      return value !== undefined ? String(value) : match;
+      if (value !== undefined) {
+        // Handle objects and arrays by converting to JSON string
+        if (typeof value === "object") {
+          return Array.isArray(value)
+            ? value.map(item => typeof item === "object" ? JSON.stringify(item) : String(item)).join(", ")
+            : JSON.stringify(value);
+        }
+        return String(value);
+      }
+      return match;
     });
   }
 
