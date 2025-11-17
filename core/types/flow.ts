@@ -10,6 +10,7 @@ import {
   VectorSearchNode,
   VectorUpdateNode,
 } from "./nodes";
+import { NodeType } from "./enums";
 
 export interface FlowDefinition {
   name: string;
@@ -31,22 +32,22 @@ export interface FlowVariable {
 // Base node interface
 export interface BaseNode {
   id: string;
-  type: NodeType;
+  type: NodeTypes;
   name: string;
 }
 
 // Node types
-export type NodeType =
-  | "LLM"
-  | "DOCUMENT_SPLITTER"
-  | "TEXT_EMBEDDING"
-  | "VECTOR_INSERT"
-  | "VECTOR_SEARCH"
-  | "VECTOR_UPDATE"
-  | "VECTOR_DELETE"
-  | "FOR_EACH"
-  | "UPDATE_VARIABLE"
-  | "CONDITION";
+export type NodeTypes =
+  | NodeType.LLM
+  | NodeType.DOCUMENT_SPLITTER
+  | NodeType.TEXT_EMBEDDING
+  | NodeType.VECTOR_INSERT
+  | NodeType.VECTOR_SEARCH
+  | NodeType.VECTOR_UPDATE
+  | NodeType.VECTOR_DELETE
+  | NodeType.FOR_EACH
+  | NodeType.UPDATE_VARIABLE
+  | NodeType.CONDITION;
 
 // Union type for all possible nodes
 export type FlowNode =

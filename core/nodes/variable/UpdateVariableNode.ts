@@ -8,55 +8,8 @@
 
 import { UpdateVariableNode, FlowNode } from "../../types";
 import { BaseNode, NodeExecutionContext } from "../base/BaseNode";
-import { ExecutionRegistry } from "../../executor/ExecutionRegistry";
 
 export class UpdateVariableNodeExecutor extends BaseNode {
-  /**
-   * Validate UPDATE_VARIABLE node specific configuration
-   */
-  protected validateNodeSpecific(node: FlowNode): void {
-    const updateNode = node as UpdateVariableNode;
-
-    if (!updateNode.config || typeof updateNode.config !== "object") {
-      throw new Error(
-        `UPDATE_VARIABLE node ${node.id} missing required config`,
-      );
-    }
-
-    if (
-      !updateNode.config.variable_id ||
-      typeof updateNode.config.variable_id !== "string"
-    ) {
-      throw new Error(
-        `UPDATE_VARIABLE node ${node.id} missing required config.variable_id`,
-      );
-    }
-
-    if (
-      !updateNode.config.type ||
-      !["join", "update"].includes(updateNode.config.type)
-    ) {
-      throw new Error(
-        `UPDATE_VARIABLE node ${node.id} config.type must be 'join' or 'update'`,
-      );
-    }
-
-    if (!updateNode.value || typeof updateNode.value !== "string") {
-      throw new Error(`UPDATE_VARIABLE node ${node.id} missing required value`);
-    }
-
-    // Validate join_str for join operations
-    if (
-      updateNode.config.type === "join" &&
-      updateNode.config.join_str !== undefined &&
-      typeof updateNode.config.join_str !== "string"
-    ) {
-      throw new Error(
-        `UPDATE_VARIABLE node ${node.id} join_str must be a string`,
-      );
-    }
-  }
-
   /**
    * Execute UPDATE_VARIABLE node
    */
@@ -71,11 +24,11 @@ export class UpdateVariableNodeExecutor extends BaseNode {
     this.validateTargetVariable(variable_id, context);
 
     // Resolve the value expression
-    // Check if it's a single variable reference (object) or a string with embedded variables
-    const resolvedValue = this.resolveValueExpression(
-      updateNode.value,
-      context.registry,
-    );
+    // Handle both string templates and object values
+    const resolvedValue =
+      typeof updateNode.value === "string"
+        ? this.resolveValueExpression(updateNode.value, context.registry)
+        : this.resolveObjectVariables(updateNode.value, context.registry);
 
     this.log(context, "debug", `Resolved value: ${resolvedValue}`);
 
@@ -129,7 +82,7 @@ export class UpdateVariableNodeExecutor extends BaseNode {
    * Perform the update operation based on type
    */
   private performUpdateOperation(
-    type: "join" | "update",
+    type: "join" | "update" | "append",
     currentValue: any,
     resolvedValue: any,
     joinStr?: string,
@@ -138,13 +91,34 @@ export class UpdateVariableNodeExecutor extends BaseNode {
       case "join":
         if (currentValue !== undefined) {
           const separator = joinStr !== undefined ? joinStr : "";
-          return String(currentValue) + separator + String(resolvedValue);
+          const currentStr =
+            typeof currentValue === "object"
+              ? JSON.stringify(currentValue)
+              : String(currentValue);
+          const resolvedStr =
+            typeof resolvedValue === "object"
+              ? JSON.stringify(resolvedValue)
+              : String(resolvedValue);
+          return currentStr + separator + resolvedStr;
         } else {
-          return String(resolvedValue);
+          return typeof resolvedValue === "object"
+            ? JSON.stringify(resolvedValue)
+            : String(resolvedValue);
         }
 
       case "update":
         return resolvedValue;
+
+      case "append":
+        if (!Array.isArray(currentValue)) {
+          throw new Error(`Cannot append to variable as it is not an array.`);
+        }
+
+        if (currentValue !== undefined) {
+          return [...currentValue, resolvedValue];
+        } else {
+          return [resolvedValue];
+        }
 
       default:
         throw new Error(`Unknown update operation type: ${type}`);

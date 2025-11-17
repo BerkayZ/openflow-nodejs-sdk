@@ -1,5 +1,5 @@
 import { BaseNode, FlowNode } from "./flow";
-import { DataType } from "./enums";
+import { DataType, NodeType } from "./enums";
 import { VectorDBProviderConfig as VectorDBConfig } from "./config";
 
 // MCP Configuration
@@ -79,7 +79,7 @@ export interface OutputSchema {
 
 // LLM Node
 export interface LLMNode extends BaseNode {
-  type: "LLM";
+  type: NodeType.LLM;
   config: ProviderConfig;
   prompt_mapping?: Record<string, string>;
   messages: Message[];
@@ -88,7 +88,7 @@ export interface LLMNode extends BaseNode {
 
 // Document Splitter Node
 export interface DocumentSplitterNode extends BaseNode {
-  type: "DOCUMENT_SPLITTER";
+  type: NodeType.DOCUMENT_SPLITTER;
   config: {
     image_quality: "high" | "medium" | "low";
     dpi: number;
@@ -105,7 +105,7 @@ export interface EmbeddingItem {
 }
 
 export interface TextEmbeddingNode extends BaseNode {
-  type: "TEXT_EMBEDDING";
+  type: NodeType.TEXT_EMBEDDING;
   config: ProviderConfig & {
     provider: string;
     model: string;
@@ -125,7 +125,7 @@ export interface VectorEmbedding {
 }
 
 export interface VectorInsertNode extends BaseNode {
-  type: "VECTOR_INSERT";
+  type: NodeType.VECTOR_INSERT;
   config: VectorDBConfig & {
     provider: string;
     index_name: string;
@@ -139,7 +139,7 @@ export interface VectorInsertNode extends BaseNode {
 }
 
 export interface VectorSearchNode extends BaseNode {
-  type: "VECTOR_SEARCH";
+  type: NodeType.VECTOR_SEARCH;
   config: VectorDBConfig & {
     provider: string;
     index_name: string;
@@ -156,7 +156,7 @@ export interface VectorSearchNode extends BaseNode {
 }
 
 export interface VectorUpdateNode extends BaseNode {
-  type: "VECTOR_UPDATE";
+  type: NodeType.VECTOR_UPDATE;
   config: VectorDBConfig;
   input: {
     update?: VectorEmbedding;
@@ -165,7 +165,7 @@ export interface VectorUpdateNode extends BaseNode {
 }
 
 export interface VectorDeleteNode extends BaseNode {
-  type: "VECTOR_DELETE";
+  type: NodeType.VECTOR_DELETE;
   config: VectorDBConfig;
   input: {
     ids: string[];
@@ -174,7 +174,7 @@ export interface VectorDeleteNode extends BaseNode {
 
 // Control Flow Nodes
 export interface ForEachNode extends BaseNode {
-  type: "FOR_EACH";
+  type: NodeType.FOR_EACH;
   config: {
     delay_between?: number;
     each_key: string;
@@ -186,13 +186,13 @@ export interface ForEachNode extends BaseNode {
 }
 
 export interface UpdateVariableNode extends BaseNode {
-  type: "UPDATE_VARIABLE";
+  type: NodeType.UPDATE_VARIABLE;
   config: {
-    type: "join" | "update";
+    type: "join" | "update" | "append";
     variable_id: string;
     join_str?: string;
   };
-  value: string; // Variable reference
+  value: string | object; // Variable reference or JSON object
 }
 
 // Condition types
@@ -210,7 +210,7 @@ export interface ConditionBranch {
 }
 
 export interface ConditionNode extends BaseNode {
-  type: "CONDITION";
+  type: NodeType.CONDITION;
   input: {
     switch_value: string; // Variable reference
   };
