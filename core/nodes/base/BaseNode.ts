@@ -76,7 +76,13 @@ export abstract class BaseNode {
         // Handle objects and arrays by converting to JSON string
         if (typeof value === "object") {
           return Array.isArray(value)
-            ? value.map(item => typeof item === "object" ? JSON.stringify(item) : String(item)).join(", ")
+            ? value
+                .map((item) =>
+                  typeof item === "object"
+                    ? JSON.stringify(item)
+                    : String(item),
+                )
+                .join(", ")
             : JSON.stringify(value);
         }
         return String(value);
@@ -126,7 +132,10 @@ export abstract class BaseNode {
   /**
    * Resolve variables in config object
    */
-  protected resolveConfigVariables(config: any, registry: ExecutionRegistry): any {
+  protected resolveConfigVariables(
+    config: any,
+    registry: ExecutionRegistry,
+  ): any {
     return this.resolveObjectVariables(config, registry);
   }
 

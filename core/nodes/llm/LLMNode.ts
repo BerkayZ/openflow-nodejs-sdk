@@ -276,7 +276,9 @@ export class LLMNodeExecutor extends BaseNode {
       mcp_servers: resolvedConfig.mcp_servers,
       tools: resolvedConfig.tools || {
         auto_discover: true,
-        mcp_servers: resolvedConfig.mcp_servers.map((server: any) => server.name),
+        mcp_servers: resolvedConfig.mcp_servers.map(
+          (server: any) => server.name,
+        ),
       },
     };
 

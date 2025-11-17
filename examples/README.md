@@ -94,22 +94,26 @@ The SDK now supports comprehensive variable manipulation operations for professi
 ### Array Operations
 
 - **`extract`** - Extract specific fields from object arrays
+
   ```typescript
   // [{text: "hello", id: "1"}] → ["hello"]
   { type: "extract", field_path: "text" }
   ```
 
 - **`map`** - Transform array elements with custom mapping
+
   ```typescript
   { type: "map", mapping: { "content": "text", "source": "id" } }
   ```
 
 - **`filter`** - Filter array elements by conditions
+
   ```typescript
   { type: "filter", condition: { field: "score", operator: "greater_than", value: 0.8 } }
   ```
 
 - **`slice`** - Get subset of array
+
   ```typescript
   { type: "slice", slice_start: 0, slice_end: 3 }
   ```
@@ -120,6 +124,7 @@ The SDK now supports comprehensive variable manipulation operations for professi
 ### Object Operations
 
 - **`pick`** - Select specific properties from objects
+
   ```typescript
   // [{text: "hello", id: "1"}] → [{text: "hello"}]
   { type: "pick", fields: ["text"] }
@@ -137,6 +142,7 @@ The SDK now supports comprehensive variable manipulation operations for professi
 - **Variable resolution**: All config fields support `{{variable}}` syntax
 - **Type safety**: Comprehensive error handling for invalid operations
 - **Output stringification control**: Use `stringify_output: false` to preserve objects as objects instead of converting to JSON strings
+
   ```typescript
   // Keep objects as objects (default for most operations)
   { type: "pick", fields: ["text"], stringify_output: false }

@@ -88,7 +88,18 @@ export class UpdateVariableNodeExecutor extends BaseNode {
    * Perform the update operation based on type
    */
   private performUpdateOperation(
-    type: "join" | "update" | "append" | "extract" | "pick" | "omit" | "map" | "filter" | "slice" | "flatten" | "concat",
+    type:
+      | "join"
+      | "update"
+      | "append"
+      | "extract"
+      | "pick"
+      | "omit"
+      | "map"
+      | "filter"
+      | "slice"
+      | "flatten"
+      | "concat",
     currentValue: any,
     resolvedValue: any,
     config: any,
@@ -96,7 +107,10 @@ export class UpdateVariableNodeExecutor extends BaseNode {
     switch (type) {
       case "join": {
         const separator = config.join_str !== undefined ? config.join_str : "";
-        const shouldStringify = config.stringify_output !== undefined ? config.stringify_output : true;
+        const shouldStringify =
+          config.stringify_output !== undefined
+            ? config.stringify_output
+            : true;
 
         if (currentValue !== undefined) {
           const currentStr =
@@ -123,12 +137,16 @@ export class UpdateVariableNodeExecutor extends BaseNode {
           throw new Error(`Cannot append to variable as it is not an array.`);
         }
 
-        const shouldStringify = config.stringify_output !== undefined ? config.stringify_output : true;
+        const shouldStringify =
+          config.stringify_output !== undefined
+            ? config.stringify_output
+            : true;
 
         // For objects, optionally stringify them before appending
-        const valueToAppend = typeof resolvedValue === "object" && shouldStringify
-          ? JSON.stringify(resolvedValue)
-          : resolvedValue;
+        const valueToAppend =
+          typeof resolvedValue === "object" && shouldStringify
+            ? JSON.stringify(resolvedValue)
+            : resolvedValue;
 
         if (currentValue !== undefined) {
           return [...currentValue, valueToAppend];
@@ -145,14 +163,21 @@ export class UpdateVariableNodeExecutor extends BaseNode {
           throw new Error("Extract operation requires field_path in config");
         }
 
-        const shouldStringify = config.stringify_output !== undefined ? config.stringify_output : false;
+        const shouldStringify =
+          config.stringify_output !== undefined
+            ? config.stringify_output
+            : false;
 
-        return resolvedValue.map((item: any) => {
-          const extracted = this.getNestedValue(item, config.field_path);
-          return extracted !== undefined && typeof extracted === "object" && shouldStringify
-            ? JSON.stringify(extracted)
-            : extracted;
-        }).filter(value => value !== undefined);
+        return resolvedValue
+          .map((item: any) => {
+            const extracted = this.getNestedValue(item, config.field_path);
+            return extracted !== undefined &&
+              typeof extracted === "object" &&
+              shouldStringify
+              ? JSON.stringify(extracted)
+              : extracted;
+          })
+          .filter((value) => value !== undefined);
       }
 
       case "pick": {
@@ -160,7 +185,10 @@ export class UpdateVariableNodeExecutor extends BaseNode {
           throw new Error("Pick operation requires fields array in config");
         }
 
-        const shouldStringify = config.stringify_output !== undefined ? config.stringify_output : false;
+        const shouldStringify =
+          config.stringify_output !== undefined
+            ? config.stringify_output
+            : false;
 
         if (Array.isArray(resolvedValue)) {
           const result = resolvedValue.map((item: any) => {
@@ -206,7 +234,9 @@ export class UpdateVariableNodeExecutor extends BaseNode {
           return shouldStringify ? JSON.stringify(picked) : picked;
         }
 
-        throw new Error("Pick operation requires an object or array of objects");
+        throw new Error(
+          "Pick operation requires an object or array of objects",
+        );
       }
 
       case "omit": {
@@ -214,7 +244,10 @@ export class UpdateVariableNodeExecutor extends BaseNode {
           throw new Error("Omit operation requires fields array in config");
         }
 
-        const shouldStringify = config.stringify_output !== undefined ? config.stringify_output : false;
+        const shouldStringify =
+          config.stringify_output !== undefined
+            ? config.stringify_output
+            : false;
 
         if (Array.isArray(resolvedValue)) {
           return resolvedValue.map((item: any) => {
@@ -243,7 +276,9 @@ export class UpdateVariableNodeExecutor extends BaseNode {
           return shouldStringify ? JSON.stringify(omitted) : omitted;
         }
 
-        throw new Error("Omit operation requires an object or array of objects");
+        throw new Error(
+          "Omit operation requires an object or array of objects",
+        );
       }
 
       case "map": {
@@ -256,7 +291,9 @@ export class UpdateVariableNodeExecutor extends BaseNode {
 
         return resolvedValue.map((item: any) => {
           const mapped: any = {};
-          for (const [targetField, sourcePath] of Object.entries(config.mapping)) {
+          for (const [targetField, sourcePath] of Object.entries(
+            config.mapping,
+          )) {
             if (typeof sourcePath === "string") {
               mapped[targetField] = this.getNestedValue(item, sourcePath);
             } else {
@@ -277,7 +314,11 @@ export class UpdateVariableNodeExecutor extends BaseNode {
 
         return resolvedValue.filter((item: any) => {
           const fieldValue = this.getNestedValue(item, config.condition.field);
-          return this.evaluateCondition(fieldValue, config.condition.operator, config.condition.value);
+          return this.evaluateCondition(
+            fieldValue,
+            config.condition.operator,
+            config.condition.value,
+          );
         });
       }
 
@@ -301,7 +342,9 @@ export class UpdateVariableNodeExecutor extends BaseNode {
 
       case "concat": {
         if (!Array.isArray(currentValue)) {
-          throw new Error("Concat operation requires current variable to be an array");
+          throw new Error(
+            "Concat operation requires current variable to be an array",
+          );
         }
         if (!Array.isArray(resolvedValue)) {
           throw new Error("Concat operation requires input to be an array");
@@ -366,14 +409,21 @@ export class UpdateVariableNodeExecutor extends BaseNode {
   /**
    * Evaluate condition for filter operations
    */
-  private evaluateCondition(fieldValue: any, operator: string, compareValue: any): boolean {
+  private evaluateCondition(
+    fieldValue: any,
+    operator: string,
+    compareValue: any,
+  ): boolean {
     switch (operator) {
       case "equals":
         return fieldValue === compareValue;
       case "not_equals":
         return fieldValue !== compareValue;
       case "contains":
-        if (typeof fieldValue === "string" && typeof compareValue === "string") {
+        if (
+          typeof fieldValue === "string" &&
+          typeof compareValue === "string"
+        ) {
           return fieldValue.includes(compareValue);
         }
         if (Array.isArray(fieldValue)) {
@@ -381,9 +431,17 @@ export class UpdateVariableNodeExecutor extends BaseNode {
         }
         return false;
       case "greater_than":
-        return typeof fieldValue === "number" && typeof compareValue === "number" && fieldValue > compareValue;
+        return (
+          typeof fieldValue === "number" &&
+          typeof compareValue === "number" &&
+          fieldValue > compareValue
+        );
       case "less_than":
-        return typeof fieldValue === "number" && typeof compareValue === "number" && fieldValue < compareValue;
+        return (
+          typeof fieldValue === "number" &&
+          typeof compareValue === "number" &&
+          fieldValue < compareValue
+        );
       default:
         throw new Error(`Unknown condition operator: ${operator}`);
     }
