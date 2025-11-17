@@ -109,16 +109,22 @@ export class UpdateVariableNodeExecutor extends BaseNode {
       case "update":
         return resolvedValue;
 
-      case "append":
+      case "append": {
         if (!Array.isArray(currentValue)) {
           throw new Error(`Cannot append to variable as it is not an array.`);
         }
 
+        // For objects, stringify them before appending
+        const valueToAppend = typeof resolvedValue === "object"
+          ? JSON.stringify(resolvedValue)
+          : resolvedValue;
+
         if (currentValue !== undefined) {
-          return [...currentValue, resolvedValue];
+          return [...currentValue, valueToAppend];
         } else {
-          return [resolvedValue];
+          return [valueToAppend];
         }
+      }
 
       default:
         throw new Error(`Unknown update operation type: ${type}`);
