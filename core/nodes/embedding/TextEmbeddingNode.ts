@@ -17,10 +17,16 @@ export class TextEmbeddingNodeExecutor extends BaseNode {
   async execute(node: FlowNode, context: NodeExecutionContext): Promise<any> {
     const embeddingNode = node as TextEmbeddingNode;
 
+    // Resolve config variables
+    const resolvedConfig = this.resolveConfigVariables(
+      embeddingNode.config,
+      context.registry,
+    );
+
     this.log(
       context,
       "info",
-      `Executing Text Embedding node: ${embeddingNode.id} with provider: ${embeddingNode.config.provider}`,
+      `Executing Text Embedding node: ${embeddingNode.id} with provider: ${resolvedConfig.provider}`,
     );
 
     // Resolve input variables
@@ -36,14 +42,14 @@ export class TextEmbeddingNodeExecutor extends BaseNode {
 
     // Get provider configuration
     const providerConfig = this.getProviderConfig(
-      embeddingNode.config.provider,
+      resolvedConfig.provider,
       context,
     );
 
     // Create provider instance
-    const provider = this.createProvider(embeddingNode.config.provider, {
+    const provider = this.createProvider(resolvedConfig.provider, {
       ...providerConfig,
-      model: embeddingNode.config.model,
+      model: resolvedConfig.model,
     });
 
     // Generate embeddings

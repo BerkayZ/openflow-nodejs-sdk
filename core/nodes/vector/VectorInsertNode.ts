@@ -18,10 +18,16 @@ export class VectorInsertNodeExecutor extends BaseNode {
   async execute(node: FlowNode, context: NodeExecutionContext): Promise<any> {
     const vectorNode = node as VectorInsertNode;
 
+    // Resolve config variables
+    const resolvedConfig = this.resolveConfigVariables(
+      vectorNode.config,
+      context.registry,
+    );
+
     this.log(
       context,
       "info",
-      `Executing Vector Insert node: ${vectorNode.id} with provider: ${vectorNode.config.provider}`,
+      `Executing Vector Insert node: ${vectorNode.id} with provider: ${resolvedConfig.provider}`,
     );
 
     // Resolve input variables
@@ -41,20 +47,20 @@ export class VectorInsertNodeExecutor extends BaseNode {
 
     // Get provider configuration
     const providerConfig = this.getProviderConfig(
-      vectorNode.config.provider || "pinecone",
+      resolvedConfig.provider || "pinecone",
       context,
     );
 
     // Create provider instance
     const provider = this.createProvider(
-      vectorNode.config.provider || "pinecone",
+      resolvedConfig.provider || "pinecone",
       providerConfig,
     );
 
     // Insert vectors
-    const result = await provider.upsert(vectorNode.config.index_name, {
+    const result = await provider.upsert(resolvedConfig.index_name, {
       vectors,
-      namespace: vectorNode.config.namespace,
+      namespace: resolvedConfig.namespace,
     });
 
     this.log(

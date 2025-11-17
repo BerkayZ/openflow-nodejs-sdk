@@ -21,15 +21,21 @@ export class LLMNodeExecutor extends BaseNode {
   async execute(node: FlowNode, context: NodeExecutionContext): Promise<any> {
     const llmNode = node as LLMNode;
 
+    // Resolve config variables
+    const resolvedConfig = this.resolveConfigVariables(
+      llmNode.config,
+      context.registry,
+    );
+
     this.log(
       context,
       "info",
-      `Executing LLM node: ${llmNode.id} with provider: ${llmNode.config.provider}`,
+      `Executing LLM node: ${llmNode.id} with provider: ${resolvedConfig.provider}`,
     );
 
     // Initialize MCP if configured
-    if (llmNode.config.mcp_servers && llmNode.config.mcp_servers.length > 0) {
-      await this.initializeMCP(llmNode, context);
+    if (resolvedConfig.mcp_servers && resolvedConfig.mcp_servers.length > 0) {
+      await this.initializeMCP(llmNode, context, resolvedConfig);
     }
 
     // Resolve variables in messages
@@ -47,13 +53,13 @@ export class LLMNodeExecutor extends BaseNode {
 
     // Get provider configuration from context
     const providerConfig = this.getProviderConfig(
-      llmNode.config.provider,
+      resolvedConfig.provider,
       context,
     );
 
     // Create provider instance
     const provider = ProviderFactory.createProvider(
-      llmNode.config,
+      resolvedConfig,
       providerConfig.apiKey,
     );
 
@@ -254,22 +260,23 @@ export class LLMNodeExecutor extends BaseNode {
   private async initializeMCP(
     llmNode: LLMNode,
     context: NodeExecutionContext,
+    resolvedConfig: any,
   ): Promise<void> {
-    if (!llmNode.config.mcp_servers) {
+    if (!resolvedConfig.mcp_servers) {
       return;
     }
 
     this.log(
       context,
       "info",
-      `Initializing MCP with ${llmNode.config.mcp_servers.length} servers`,
+      `Initializing MCP with ${resolvedConfig.mcp_servers.length} servers`,
     );
 
     const mcpConfig: MCPConfig = {
-      mcp_servers: llmNode.config.mcp_servers,
-      tools: llmNode.config.tools || {
+      mcp_servers: resolvedConfig.mcp_servers,
+      tools: resolvedConfig.tools || {
         auto_discover: true,
-        mcp_servers: llmNode.config.mcp_servers.map((server) => server.name),
+        mcp_servers: resolvedConfig.mcp_servers.map((server: any) => server.name),
       },
     };
 

@@ -115,6 +115,13 @@ export abstract class BaseNode {
   }
 
   /**
+   * Resolve variables in config object
+   */
+  protected resolveConfigVariables(config: any, registry: ExecutionRegistry): any {
+    return this.resolveObjectVariables(config, registry);
+  }
+
+  /**
    * Log with context information
    */
   protected log(
