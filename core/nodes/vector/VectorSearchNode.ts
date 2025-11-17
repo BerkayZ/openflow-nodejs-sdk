@@ -18,10 +18,16 @@ export class VectorSearchNodeExecutor extends BaseNode {
   async execute(node: FlowNode, context: NodeExecutionContext): Promise<any> {
     const vectorNode = node as VectorSearchNode;
 
+    // Resolve config variables
+    const resolvedConfig = this.resolveConfigVariables(
+      vectorNode.config,
+      context.registry,
+    );
+
     this.log(
       context,
       "info",
-      `Executing Vector Search node: ${vectorNode.id} with provider: ${vectorNode.config.provider}`,
+      `Executing Vector Search node: ${vectorNode.id} with provider: ${resolvedConfig.provider}`,
     );
 
     // Resolve input variables
@@ -32,36 +38,36 @@ export class VectorSearchNodeExecutor extends BaseNode {
     this.log(context, "debug", `Resolved input:`, resolvedInput);
 
     // Prepare search parameters
-    const searchParams = this.prepareSearchParams(resolvedInput, vectorNode);
+    const searchParams = this.prepareSearchParams(resolvedInput, resolvedConfig);
     this.log(context, "debug", `Search parameters:`, searchParams);
 
     // Get provider configuration
     const providerConfig = this.getProviderConfig(
-      vectorNode.config.provider || "pinecone",
+      resolvedConfig.provider || "pinecone",
       context,
     );
 
     // Create provider instance
     const provider = this.createProvider(
-      vectorNode.config.provider || "pinecone",
+      resolvedConfig.provider || "pinecone",
       providerConfig,
     );
 
     // Perform search
-    const result = await provider.query(vectorNode.config.index_name, {
+    const result = await provider.query(resolvedConfig.index_name, {
       vector: searchParams.vector,
       topK: searchParams.topK,
-      filter: vectorNode.config.filter,
-      namespace: vectorNode.config.namespace,
+      filter: resolvedConfig.filter,
+      namespace: resolvedConfig.namespace,
       includeMetadata: true,
       includeValues: true,
     });
 
     // Apply similarity threshold filtering if specified
     let filteredResults = result.matches;
-    if (vectorNode.config.similarity_threshold !== undefined) {
+    if (resolvedConfig.similarity_threshold !== undefined) {
       filteredResults = result.matches.filter(
-        (match) => match.score >= vectorNode.config.similarity_threshold!,
+        (match) => match.score >= resolvedConfig.similarity_threshold!,
       );
     }
 
@@ -94,13 +100,13 @@ export class VectorSearchNodeExecutor extends BaseNode {
    */
   private prepareSearchParams(
     input: any,
-    vectorNode: VectorSearchNode,
+    resolvedConfig: any,
   ): {
     vector: number[];
     topK: number;
   } {
     let vector: number[] | undefined;
-    const topK = vectorNode.config.top_k || input.top_k || 10;
+    const topK = resolvedConfig.top_k || input.top_k || 10;
 
     // Handle search_vector (resolved variable reference)
     if (input.search_vector) {

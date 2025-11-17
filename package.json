@@ -1,5 +1,5 @@
 {
-  "name": "openflow-nodejs-sdk",
+  "name": "openflow",
   "version": "0.0.1-pre-alpha",
   "description": "Open protocol for AI LLM flow development (Under development)",
   "author": "Berkay Zelyurt <zelyurtberkay@gmail.com>",
