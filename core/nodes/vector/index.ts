@@ -8,5 +8,6 @@
 
 export { VectorInsertNodeExecutor } from "./VectorInsertNode";
 export { VectorSearchNodeExecutor } from "./VectorSearchNode";
+export { VectorDeleteNodeExecutor } from "./VectorDeleteNode";
 export * from "./types";
 export * from "./providers/PineconeProvider";
