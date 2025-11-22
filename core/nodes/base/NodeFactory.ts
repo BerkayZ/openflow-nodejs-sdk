@@ -10,7 +10,11 @@ import { NodeType } from "../../types";
 import { BaseNode } from "./BaseNode";
 import { LLMNodeExecutor } from "../llm";
 import { UpdateVariableNodeExecutor } from "../variable/UpdateVariableNode";
-import { VectorInsertNodeExecutor, VectorSearchNodeExecutor } from "../vector";
+import {
+  VectorDeleteNodeExecutor,
+  VectorInsertNodeExecutor,
+  VectorSearchNodeExecutor,
+} from "../vector";
 import { TextEmbeddingNodeExecutor } from "../embedding";
 import { ConditionNodeExecutor } from "../condition";
 import { DocumentSplitterNodeExecutor } from "../document";
@@ -38,10 +42,11 @@ export class NodeFactory {
       DocumentSplitterNodeExecutor,
     );
     NodeFactory.register(NodeType.FOR_EACH, ForEachNodeExecutor);
+    NodeFactory.register(NodeType.VECTOR_DELETE, VectorDeleteNodeExecutor);
 
     // Future node types will be registered here:
     // NodeFactory.register('VECTOR_UPDATE', VectorUpdateNodeExecutor);
-    // NodeFactory.register('VECTOR_DELETE', VectorDeleteNodeExecutor);
+    //
   }
 
   /**
