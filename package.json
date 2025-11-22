@@ -2,12 +2,40 @@
   "name": "openflow",
   "version": "0.0.1-pre-alpha",
   "description": "Open protocol for AI LLM flow development (Under development)",
+  "keywords": [
+    "ai",
+    "llm",
+    "workflow",
+    "automation",
+    "typescript",
+    "flow",
+    "protocol"
+  ],
+  "homepage": "https://github.com/berkayz/openflow-nodejs-sdk#readme",
+  "bugs": {
+    "url": "https://github.com/berkayz/openflow-nodejs-sdk/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/BerkayZ/openflow-nodejs-sdk.git"
+  },
+  "license": "GPL-3.0-or-later",
   "author": "Berkay Zelyurt <zelyurtberkay@gmail.com>",
+  "type": "commonjs",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "bin": {
     "openflow": "dist/cli.js"
   },
+  "directories": {
+    "example": "examples",
+    "test": "tests"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE.md"
+  ],
   "scripts": {
     "build": "tsc",
     "dev": "tsc --watch",
@@ -40,22 +68,15 @@
     "example:12": "npx ts-node examples/12-rag-chat.ts",
     "example:13": "npx ts-node examples/13-document-chat.ts"
   },
-  "keywords": [
-    "ai",
-    "llm",
-    "workflow",
-    "automation",
-    "typescript",
-    "flow",
-    "protocol"
-  ],
-  "license": "GPL-3.0-or-later",
-  "licenses": [
-    {
-      "type": "GPL-3.0-or-later",
-      "url": "https://www.gnu.org/licenses/gpl-3.0.en.html"
-    }
-  ],
+  "dependencies": {
+    "@pinecone-database/pinecone": "^6.1.1",
+    "@types/uuid": "^10.0.0",
+    "axios": "^1.6.7",
+    "dotenv": "^16.4.1",
+    "pdf2image": "^1.2.3",
+    "sharp": "^0.33.5",
+    "uuid": "^11.1.0"
+  },
   "devDependencies": {
     "@types/jest": "^29.5.14",
     "@types/node": "^20.11.17",
@@ -75,20 +96,6 @@
     "typedoc": "^0.25.13",
     "typescript": "^5.3.3"
   },
-  "files": [
-    "dist",
-    "README.md",
-    "LICENSE.md"
-  ],
-  "dependencies": {
-    "@pinecone-database/pinecone": "^6.1.1",
-    "@types/uuid": "^10.0.0",
-    "axios": "^1.6.7",
-    "dotenv": "^16.4.1",
-    "pdf2image": "^1.2.3",
-    "sharp": "^0.33.5",
-    "uuid": "^11.1.0"
-  },
   "peerDependencies": {
     "typescript": ">=4.5.0"
   },
@@ -99,8 +106,10 @@
     "node": ">=18.0.0",
     "npm": ">=8.0.0"
   },
-  "bugs": {
-    "url": "https://github.com/berkayz/openflow-nodejs-sdk/issues"
-  },
-  "homepage": "https://github.com/berkayz/openflow-nodejs-sdk#readme"
+  "licenses": [
+    {
+      "type": "GPL-3.0-or-later",
+      "url": "https://www.gnu.org/licenses/gpl-3.0.en.html"
+    }
+  ]
 }
