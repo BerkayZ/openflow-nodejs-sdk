@@ -6,7 +6,7 @@
  * If not included, see <https://www.gnu.org/licenses/gpl-3.0.en.html>
  */
 
-import { BaseProvider, LLMMessage, LLMResponse } from "./BaseProvider";
+import { BaseProvider, LLMMessage, LLMResponse, StreamChunk } from "./BaseProvider";
 import { ProviderConfig, OutputSchema } from "../../../types";
 import { PromptBuilder } from "../PromptBuilder";
 
@@ -212,6 +212,113 @@ export class OpenAIProvider extends BaseProvider {
     } catch (error) {
       throw new Error(
         `Failed to generate completion with OpenAI: ${error instanceof Error ? error.message : String(error)}`,
+      );
+    }
+  }
+
+  async *generateCompletionStream(
+    messages: LLMMessage[],
+    outputSchema: OutputSchema,
+  ): AsyncGenerator<StreamChunk, void, unknown> {
+    const input = this.convertMessagesToOpenAIFormat(messages, outputSchema);
+
+    const requestBody = {
+      model: this.config.model || "gpt-4.1",
+      input: input,
+      max_output_tokens: this.config.max_tokens || 2000,
+      temperature: this.config.temperature || 1.0,
+      top_p: 1.0,
+      stream: true, // Enable streaming
+      store: true,
+      parallel_tool_calls: true,
+      tool_choice: "auto",
+      tools: [],
+      truncation: "disabled",
+    };
+
+    try {
+      const response = await fetch(OpenAIProvider.API_URL, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${this.apiKey}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(requestBody),
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`OpenAI API error: ${response.status} - ${errorText}`);
+      }
+
+      const reader = response.body?.getReader();
+      if (!reader) {
+        throw new Error("Failed to get response stream reader");
+      }
+
+      const decoder = new TextDecoder();
+      let buffer = "";
+      let accumulatedContent = "";
+      let usage: any = undefined;
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split("\n");
+        buffer = lines.pop() || "";
+
+        for (const line of lines) {
+          if (line.trim() === "" || line.trim() === "data: [DONE]") continue;
+
+          if (line.startsWith("data: ")) {
+            try {
+              const jsonStr = line.slice(6);
+              const data = JSON.parse(jsonStr);
+
+              // Handle OpenAI streaming format
+              if (data.output?.[0]?.content) {
+                const outputContent = data.output[0].content.find(
+                  (c: any) => c.type === "output_text"
+                );
+
+                if (outputContent?.text) {
+                  const chunk = outputContent.text;
+                  accumulatedContent += chunk;
+
+                  yield {
+                    content: chunk,
+                    isComplete: false,
+                  };
+                }
+              }
+
+              // Capture usage data if available
+              if (data.usage) {
+                usage = {
+                  prompt_tokens: data.usage.input_tokens,
+                  completion_tokens: data.usage.output_tokens,
+                  total_tokens: data.usage.total_tokens,
+                };
+              }
+            } catch (error) {
+              // Skip invalid JSON lines
+              console.error("Failed to parse SSE chunk:", error);
+            }
+          }
+        }
+      }
+
+      // Final chunk with usage data
+      yield {
+        content: "",
+        isComplete: true,
+        usage,
+      };
+    } catch (error) {
+      throw new Error(
+        `Failed to generate streaming completion with OpenAI: ${error instanceof Error ? error.message : String(error)}`,
       );
     }
   }

@@ -17,6 +17,16 @@ export interface LLMResponse {
   };
 }
 
+export interface StreamChunk {
+  content: string;
+  isComplete: boolean;
+  usage?: {
+    prompt_tokens: number;
+    completion_tokens: number;
+    total_tokens: number;
+  };
+}
+
 export interface LLMMessage {
   role: "system" | "user" | "assistant";
   content:
@@ -44,6 +54,24 @@ export abstract class BaseProvider {
     messages: LLMMessage[],
     outputSchema: OutputSchema,
   ): Promise<LLMResponse>;
+
+  /**
+   * Generate completion with streaming support
+   * Returns an async generator that yields stream chunks
+   */
+  async *generateCompletionStream(
+    messages: LLMMessage[],
+    outputSchema: OutputSchema,
+  ): AsyncGenerator<StreamChunk, void, unknown> {
+    // Default implementation: convert non-streaming to streaming
+    // Providers can override this for true streaming support
+    const response = await this.generateCompletion(messages, outputSchema);
+    yield {
+      content: response.content,
+      isComplete: true,
+      usage: response.usage,
+    };
+  }
 
   protected parseJsonResponse(response: string): any {
     try {

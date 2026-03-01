@@ -6,6 +6,16 @@ export interface ExecutionResult {
   outputs: Record<string, any>;
 }
 
+export interface StreamExecutionChunk {
+  type: "node_start" | "node_complete" | "stream_chunk" | "flow_complete" | "error";
+  nodeId?: string;
+  content?: string;
+  isComplete?: boolean;
+  outputs?: Record<string, any>;
+  error?: Error;
+  executionTime?: number;
+}
+
 export interface QueuedFlow {
   id: string;
   flow: any;

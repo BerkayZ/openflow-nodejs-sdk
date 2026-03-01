@@ -46,6 +46,7 @@ export interface FlowExecutorConfig {
   timeout?: number;
   logLevel: LogLevel;
   tempDir?: string;
+  enableStreaming?: boolean;
 }
 
 // Execution Status Types

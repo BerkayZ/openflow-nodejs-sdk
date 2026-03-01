@@ -6,7 +6,7 @@
  * If not included, see <https://www.gnu.org/licenses/gpl-3.0.en.html>
  */
 
-import { BaseProvider, LLMMessage, LLMResponse } from "./BaseProvider";
+import { BaseProvider, LLMMessage, LLMResponse, StreamChunk } from "./BaseProvider";
 import { ProviderConfig, OutputSchema } from "../../../types";
 import { PromptBuilder } from "../PromptBuilder";
 
@@ -110,6 +110,126 @@ export class GrokProvider extends BaseProvider {
     } catch (error) {
       throw new Error(
         `Failed to generate completion with Grok: ${error instanceof Error ? error.message : String(error)}`,
+      );
+    }
+  }
+
+  async *generateCompletionStream(
+    messages: LLMMessage[],
+    outputSchema: OutputSchema,
+  ): AsyncGenerator<StreamChunk, void, unknown> {
+    const userMessage = messages[messages.length - 1];
+
+    // Handle multimodal messages
+    let enhancedContent: string | Array<any>;
+
+    if (Array.isArray(userMessage.content)) {
+      const textContent = userMessage.content.find((c) => c.type === "text");
+      const textToEnhance = textContent?.text || "";
+      const outputInstructions =
+        PromptBuilder.buildOutputInstructions(outputSchema);
+      const enhancedPrompt = textToEnhance + outputInstructions;
+
+      enhancedContent = userMessage.content.map((content) => {
+        if (content.type === "text") {
+          return { ...content, text: enhancedPrompt };
+        }
+        return content;
+      });
+    } else {
+      enhancedContent = PromptBuilder.buildPromptWithOutputInstructions(
+        userMessage.content,
+        outputSchema,
+      );
+    }
+
+    const requestBody = {
+      model: this.config.model || "grok-3-latest",
+      messages: [
+        ...messages.slice(0, -1),
+        { role: "user", content: enhancedContent },
+      ],
+      max_tokens: this.config.max_tokens || 2000,
+      temperature: Math.min(this.config.temperature || 0.3, 0.3),
+      stream: true, // Enable streaming
+    };
+
+    try {
+      const response = await fetch(GrokProvider.API_URL, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${this.apiKey}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(requestBody),
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Grok API error: ${response.status} - ${errorText}`);
+      }
+
+      const reader = response.body?.getReader();
+      if (!reader) {
+        throw new Error("Failed to get response stream reader");
+      }
+
+      const decoder = new TextDecoder();
+      let buffer = "";
+      let accumulatedContent = "";
+      let usage: any = undefined;
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split("\n");
+        buffer = lines.pop() || "";
+
+        for (const line of lines) {
+          if (line.trim() === "" || line.trim() === "data: [DONE]") continue;
+
+          if (line.startsWith("data: ")) {
+            try {
+              const jsonStr = line.slice(6);
+              const data = JSON.parse(jsonStr);
+
+              if (data.choices?.[0]?.delta?.content) {
+                const chunk = data.choices[0].delta.content;
+                accumulatedContent += chunk;
+
+                yield {
+                  content: chunk,
+                  isComplete: false,
+                };
+              }
+
+              // Capture usage data if available
+              if (data.usage) {
+                usage = {
+                  prompt_tokens: data.usage.prompt_tokens,
+                  completion_tokens: data.usage.completion_tokens,
+                  total_tokens: data.usage.total_tokens,
+                };
+              }
+            } catch (error) {
+              // Skip invalid JSON lines
+              console.error("Failed to parse SSE chunk:", error);
+            }
+          }
+        }
+      }
+
+      // Final chunk with usage data
+      yield {
+        content: "",
+        isComplete: true,
+        usage,
+      };
+    } catch (error) {
+      throw new Error(
+        `Failed to generate streaming completion with Grok: ${error instanceof Error ? error.message : String(error)}`,
       );
     }
   }

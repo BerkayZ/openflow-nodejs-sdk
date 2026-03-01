@@ -10,6 +10,7 @@ import {
   FlowExecutorConfig,
   FlowDefinition,
   ExecutionResult,
+  StreamExecutionChunk,
   QueuedFlow,
   FlowHooks,
   HookSignal,
@@ -81,6 +82,131 @@ export class FlowExecutor {
       this.logger.info(`Flow ${flowId} queued for execution`);
       this.processQueue();
     });
+  }
+
+  /**
+   * Execute a flow with streaming support
+   * Returns an async generator that yields execution chunks
+   */
+  async *executeFlowStream(
+    flowJson: any,
+    inputVariables?: Record<string, any>,
+    hooks?: FlowHooks,
+  ): AsyncGenerator<StreamExecutionChunk, void, unknown> {
+    const flowId = this.generateFlowId();
+    const startTime = Date.now();
+
+    // Validate flow
+    const validation = FlowValidator.validateFlow(flowJson);
+    if (!validation.isValid) {
+      const errorMessage = `Flow validation failed: ${validation.errors.map((e) => e.message).join(", ")}`;
+      yield {
+        type: "error",
+        error: new Error(errorMessage),
+      };
+      return;
+    }
+
+    // Validate node types are supported
+    const nodeTypes = validation.flow!.nodes.map((node) => node.type);
+    const typeValidation = NodeFactory.validateRegistrations(nodeTypes);
+    if (!typeValidation.isValid) {
+      const errorMessage = `Unsupported node types: ${typeValidation.missing.join(", ")}`;
+      yield {
+        type: "error",
+        error: new Error(errorMessage),
+      };
+      return;
+    }
+
+    const flow = validation.flow!;
+    const registry = new ExecutionRegistry(flowId, flow, this.config.tempDir, inputVariables);
+
+    try {
+      // Execute nodes in order with streaming
+      const executionOrder = this.getExecutionOrder(flow);
+
+      for (const nodeId of executionOrder) {
+        const node = flow.nodes.find((n: any) => n.id === nodeId);
+        if (!node) continue;
+
+        // Notify node start
+        yield {
+          type: "node_start",
+          nodeId: node.id,
+        };
+
+        // Check if this is an LLM node that supports streaming
+        if (node.type === "LLM" && this.config.enableStreaming !== false) {
+          // Stream LLM responses
+          const nodeExecutor = NodeFactory.createNode(node.type);
+          const context: NodeExecutionContext = {
+            registry,
+            flowId,
+            logger: this.logger,
+            config: this.config,
+          };
+
+          // Check if the node executor has a streaming method
+          const llmNode = nodeExecutor as any;
+          if (llmNode.executeStream) {
+            const streamGenerator = llmNode.executeStream(node, context);
+
+            for await (const chunk of streamGenerator) {
+              yield {
+                type: "stream_chunk",
+                nodeId: node.id,
+                content: chunk.content,
+                isComplete: chunk.isComplete,
+              };
+            }
+          } else {
+            // Fallback to non-streaming execution
+            const result = await nodeExecutor.executeWithContext(node, context);
+            if (!result.success) {
+              throw result.error || new Error("Node execution failed");
+            }
+
+            if (node.output && result.output) {
+              registry.setNodeOutput(node.id, result.output);
+            }
+          }
+        } else {
+          // Regular node execution
+          const result = await this.executeNode(node, registry);
+          if (!result.success) {
+            throw result.error || new Error("Node execution failed");
+          }
+        }
+
+        // Notify node completion
+        yield {
+          type: "node_complete",
+          nodeId: node.id,
+        };
+      }
+
+      // Collect output variables
+      const outputs: Record<string, any> = {};
+      if (flow.output) {
+        for (const outputVar of flow.output) {
+          outputs[outputVar] = registry.getVariable(outputVar);
+        }
+      }
+
+      // Flow complete
+      yield {
+        type: "flow_complete",
+        outputs,
+        executionTime: Date.now() - startTime,
+      };
+
+    } catch (error) {
+      yield {
+        type: "error",
+        error: error instanceof Error ? error : new Error(String(error)),
+      };
+    }
   }
 
   /**
