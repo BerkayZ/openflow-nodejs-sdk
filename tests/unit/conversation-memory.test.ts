@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach } from '@jest/globals';
-import { ConversationMemoryNode } from '../../src/core/nodes/conversation-memory/ConversationMemoryNode';
-import { Message } from '../../src/core/types';
+import { ConversationMemoryNode } from '../../core/nodes/memory/ConversationMemoryNode';
+import { Message } from '../../core/types';
 
 describe('ConversationMemoryNode Tests', () => {
     let memoryNode: ConversationMemoryNode;

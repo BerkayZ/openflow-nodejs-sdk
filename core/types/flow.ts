@@ -49,8 +49,17 @@ export type NodeTypes =
   | NodeType.UPDATE_VARIABLE
   | NodeType.CONDITION;
 
-// Union type for all possible nodes
-export type FlowNode =
+// Base flow node with common properties and flexible config
+export interface BaseFlowNode {
+  id: string;
+  type: NodeType;
+  name: string;
+  config?: Record<string, any>;
+  [key: string]: any; // Allow additional properties
+}
+
+// Union type for all possible nodes - used for type-safe implementations
+export type SpecificFlowNode =
   | LLMNode
   | DocumentSplitterNode
   | TextEmbeddingNode
@@ -61,3 +70,6 @@ export type FlowNode =
   | ForEachNode
   | UpdateVariableNode
   | ConditionNode;
+
+// FlowNode type that accepts both specific nodes and generic nodes with NodeType enum
+export type FlowNode = BaseFlowNode;

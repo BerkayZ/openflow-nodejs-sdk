@@ -1,19 +1,19 @@
-import { LLMProvider } from '../../src/core/nodes/llm/LLMProvider';
-import { Message, LLMConfig, LLMResponse, StreamCallback, StreamToken } from '../../src/core/types';
+import { BaseProvider, LLMMessage, LLMResponse, StreamChunk } from '../../core/nodes/llm/providers/BaseProvider';
+import { ProviderConfig, OutputSchema, TextMessage } from '../../core/types';
 
 /**
  * Mock LLM Provider for testing purposes
  * Provides deterministic responses without requiring API keys
  */
-export class MockLLMProvider extends LLMProvider {
+export class MockLLMProvider extends BaseProvider {
     private mockResponses: Map<string, string> = new Map();
     private defaultResponse = {
         content: '{"message": "Mock response", "data": "test"}',
         tokens: { prompt: 10, completion: 5, total: 15 }
     };
 
-    constructor(config?: LLMConfig) {
-        super(config);
+    constructor(config: ProviderConfig, apiKey: string = 'mock-key') {
+        super(config, apiKey);
         this.setupMockResponses();
     }
 
@@ -25,8 +25,8 @@ export class MockLLMProvider extends LLMProvider {
     }
 
     async generateCompletion(
-        messages: Message[],
-        config?: LLMConfig
+        messages: LLMMessage[],
+        outputSchema: OutputSchema
     ): Promise<LLMResponse> {
         // Simulate API delay
         await this.simulateDelay(100);
@@ -36,7 +36,16 @@ export class MockLLMProvider extends LLMProvider {
             .reverse()
             .find(m => m.role === 'user');
 
-        const content = lastUserMessage?.content || '';
+        let content = '';
+        if (lastUserMessage) {
+            if (typeof lastUserMessage.content === 'string') {
+                content = lastUserMessage.content;
+            } else {
+                // Extract text from multimodal content
+                const textContent = lastUserMessage.content.find((c) => c.type === 'text');
+                content = textContent?.text || '';
+            }
+        }
 
         // Check for predefined responses
         let responseContent = this.defaultResponse.content;
@@ -53,38 +62,33 @@ export class MockLLMProvider extends LLMProvider {
                 prompt_tokens: this.defaultResponse.tokens.prompt,
                 completion_tokens: this.defaultResponse.tokens.completion,
                 total_tokens: this.defaultResponse.tokens.total
-            },
-            model: 'mock-model',
-            finish_reason: 'stop'
+            }
         };
     }
 
-    async generateCompletionStream(
-        messages: Message[],
-        config?: LLMConfig,
-        onStream?: StreamCallback
-    ): Promise<LLMResponse> {
+    async *generateCompletionStream(
+        messages: LLMMessage[],
+        outputSchema: OutputSchema
+    ): AsyncGenerator<StreamChunk, void, unknown> {
         // Get the response that would be generated
-        const response = await this.generateCompletion(messages, config);
+        const response = await this.generateCompletion(messages, outputSchema);
 
         // Simulate streaming by chunking the response
-        if (onStream) {
-            const chunks = this.chunkString(response.content, 10);
-            for (const chunk of chunks) {
-                await this.simulateDelay(50);
-                const token: StreamToken = {
-                    content: chunk,
-                    role: 'assistant'
-                };
-                await onStream(token);
-            }
+        const chunks = this.chunkString(response.content, 10);
+        for (const chunk of chunks) {
+            await this.simulateDelay(50);
+            yield {
+                content: chunk,
+                isComplete: false
+            };
         }
 
-        return response;
-    }
-
-    async isSupported(): Promise<boolean> {
-        return true;
+        // Final chunk with usage data
+        yield {
+            content: '',
+            isComplete: true,
+            usage: response.usage
+        };
     }
 
     /**

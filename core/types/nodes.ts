@@ -1,4 +1,4 @@
-import { BaseNode, FlowNode } from "./flow";
+import { BaseNode, BaseFlowNode as FlowNode } from "./flow";
 import { DataType, NodeType } from "./enums";
 import { VectorDBProviderConfig as VectorDBConfig } from "./config";
 
@@ -199,7 +199,7 @@ export interface ForEachNode extends BaseNode {
   input: {
     items: string; // Variable reference
   };
-  each_nodes: FlowNode[];
+  each_nodes: any[];
 }
 
 export interface UpdateVariableNode extends BaseNode {
@@ -255,7 +255,7 @@ export type ConditionOperator =
 export interface ConditionBranch {
   condition?: ConditionOperator;
   value?: any;
-  nodes: FlowNode[];
+  nodes: any[];
 }
 
 export interface ConditionNode extends BaseNode {
