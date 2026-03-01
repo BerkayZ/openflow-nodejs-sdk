@@ -4,7 +4,7 @@
  */
 
 import { FlowExecutor } from "../../core/executor/FlowExecutor";
-import { FlowExecutorConfig } from "../../core/types";
+import { FlowExecutorConfig, NodeType } from "../../core/types";
 import * as fs from "fs";
 import * as path from "path";
 
@@ -62,7 +62,7 @@ describe("Document Processing Integration Tests", () => {
         nodes: [
           {
             id: "split_pdf",
-            type: "DOCUMENT_SPLITTER",
+            type: NodeType.DOCUMENT_SPLITTER,
             name: "Split PDF into Images",
             config: {
               image_quality: "high",
@@ -73,7 +73,7 @@ describe("Document Processing Integration Tests", () => {
           },
           {
             id: "save_extracted_data",
-            type: "UPDATE_VARIABLE",
+            type: NodeType.UPDATE_VARIABLE,
             name: "Save Extracted Data",
             config: { type: "update", variable_id: "extracted_data" },
             value: "{{split_pdf.pages}}",
@@ -132,7 +132,7 @@ describe("Document Processing Integration Tests", () => {
         nodes: [
           {
             id: "split_pdf",
-            type: "DOCUMENT_SPLITTER",
+            type: NodeType.DOCUMENT_SPLITTER,
             name: "Split PDF",
             config: {
               image_quality: "high",
@@ -143,7 +143,7 @@ describe("Document Processing Integration Tests", () => {
           },
           {
             id: "analyze_pages",
-            type: "FOR_EACH",
+            type: NodeType.FOR_EACH,
             name: "Analyze Each Page",
             config: {
               delay_between: 1000,
@@ -155,7 +155,7 @@ describe("Document Processing Integration Tests", () => {
             each_nodes: [
               {
                 id: "analyze_page_content",
-                type: "LLM",
+                type: NodeType.LLM,
                 name: "Analyze Page Content",
                 config: {
                   provider: "grok",
@@ -192,7 +192,7 @@ describe("Document Processing Integration Tests", () => {
           },
           {
             id: "combine_analysis",
-            type: "UPDATE_VARIABLE",
+            type: NodeType.UPDATE_VARIABLE,
             name: "Combine Analysis Results",
             config: {
               type: "join",
@@ -241,7 +241,7 @@ describe("Document Processing Integration Tests", () => {
         nodes: [
           {
             id: "analyze_image",
-            type: "LLM",
+            type: NodeType.LLM,
             name: "Analyze Image",
             config: {
               provider: "grok",
@@ -289,7 +289,7 @@ describe("Document Processing Integration Tests", () => {
           },
           {
             id: "save_analysis",
-            type: "UPDATE_VARIABLE",
+            type: NodeType.UPDATE_VARIABLE,
             name: "Save Analysis",
             config: { type: "update", variable_id: "analysis_result" },
             value: "{{analyze_image.description}}",
@@ -332,7 +332,7 @@ describe("Document Processing Integration Tests", () => {
         nodes: [
           {
             id: "analyze_images",
-            type: "FOR_EACH",
+            type: NodeType.FOR_EACH,
             name: "Analyze Each Image",
             config: {
               delay_between: 2000,
@@ -344,7 +344,7 @@ describe("Document Processing Integration Tests", () => {
             each_nodes: [
               {
                 id: "analyze_current_image",
-                type: "LLM",
+                type: NodeType.LLM,
                 name: "Analyze Current Image",
                 config: {
                   provider: "grok",
@@ -376,7 +376,7 @@ describe("Document Processing Integration Tests", () => {
           },
           {
             id: "collect_results",
-            type: "UPDATE_VARIABLE",
+            type: NodeType.UPDATE_VARIABLE,
             name: "Collect Analysis Results",
             config: {
               type: "join",
@@ -411,7 +411,7 @@ describe("Document Processing Integration Tests", () => {
         nodes: [
           {
             id: "split_missing_pdf",
-            type: "DOCUMENT_SPLITTER",
+            type: NodeType.DOCUMENT_SPLITTER,
             name: "Split Missing PDF",
             config: {
               image_quality: "high",
@@ -442,7 +442,7 @@ describe("Document Processing Integration Tests", () => {
         nodes: [
           {
             id: "analyze_invalid_image",
-            type: "LLM",
+            type: NodeType.LLM,
             name: "Analyze Invalid Image",
             config: {
               provider: "grok",
@@ -496,7 +496,7 @@ describe("Document Processing Integration Tests", () => {
         nodes: [
           {
             id: "split_corrupted_pdf",
-            type: "DOCUMENT_SPLITTER",
+            type: NodeType.DOCUMENT_SPLITTER,
             name: "Split Corrupted PDF",
             config: {
               image_quality: "low",
@@ -541,7 +541,7 @@ describe("Document Processing Integration Tests", () => {
         nodes: [
           {
             id: "extract_pages",
-            type: "DOCUMENT_SPLITTER",
+            type: NodeType.DOCUMENT_SPLITTER,
             name: "Extract PDF Pages",
             config: {
               image_quality: "medium",
@@ -552,7 +552,7 @@ describe("Document Processing Integration Tests", () => {
           },
           {
             id: "summarize_document",
-            type: "LLM",
+            type: NodeType.LLM,
             name: "Summarize Document",
             config: {
               provider: "grok",
@@ -589,7 +589,7 @@ describe("Document Processing Integration Tests", () => {
           },
           {
             id: "save_summary",
-            type: "UPDATE_VARIABLE",
+            type: NodeType.UPDATE_VARIABLE,
             name: "Save Processing Summary",
             config: { type: "update", variable_id: "processing_summary" },
             value:

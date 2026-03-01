@@ -211,7 +211,12 @@ export class GrokProvider extends BaseProvider {
           if (line.startsWith("data: ")) {
             try {
               const jsonStr = line.slice(6);
-              const data = JSON.parse(jsonStr);
+              const data = JSON.parse(jsonStr, (key, value) => {
+                if (key === '__proto__' || key === 'constructor' || key === 'prototype') {
+                  return undefined;
+                }
+                return value;
+              });
 
               if (data.choices?.[0]?.delta?.content) {
                 const chunk = data.choices[0].delta.content;

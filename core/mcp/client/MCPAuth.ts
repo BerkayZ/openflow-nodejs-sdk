@@ -8,6 +8,9 @@
 
 import { MCPAuthConfig } from "../types";
 
+// Restricted headers that should not be overwritten by custom headers
+const RESTRICTED_HEADERS = ['authorization', 'x-api-key', 'cookie', 'set-cookie'];
+
 export class MCPAuth {
   private config: MCPAuthConfig;
 
@@ -53,7 +56,11 @@ export class MCPAuth {
             "Headers are required for custom_headers authentication",
           );
         }
-        Object.assign(headers, this.config.headers);
+        // Filter out restricted headers to prevent security issues
+        const sanitizedHeaders = Object.entries(this.config.headers)
+          .filter(([key]) => !RESTRICTED_HEADERS.includes(key.toLowerCase()))
+          .reduce((acc, [key, value]) => ({ ...acc, [key]: value }), {});
+        Object.assign(headers, sanitizedHeaders);
         break;
 
       case "query_params":

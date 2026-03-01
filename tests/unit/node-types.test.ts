@@ -3,12 +3,14 @@
  * Tests individual node type implementations and configurations
  */
 
+import { NodeType } from "../../core/types";
+
 describe("Node Types Unit Tests", () => {
   describe("LLM Node Configuration", () => {
     test("should validate LLM node configuration schema", () => {
       const validLLMConfig = {
         id: "test_llm",
-        type: "LLM",
+        type: NodeType.LLM,
         name: "Test LLM Node",
         config: {
           provider: "grok",
@@ -120,7 +122,7 @@ describe("Node Types Unit Tests", () => {
     test("should validate condition node structure", () => {
       const validConditionNode = {
         id: "test_condition",
-        type: "CONDITION",
+        type: NodeType.CONDITION,
         name: "Test Condition",
         input: {
           switch_value: "{{variable_to_check}}",
@@ -132,7 +134,7 @@ describe("Node Types Unit Tests", () => {
             nodes: [
               {
                 id: "case_1_action",
-                type: "UPDATE_VARIABLE",
+                type: NodeType.UPDATE_VARIABLE,
                 name: "Case 1 Action",
                 config: { type: "update", variable_id: "result" },
                 value: "Case 1 executed",
@@ -145,7 +147,7 @@ describe("Node Types Unit Tests", () => {
             nodes: [
               {
                 id: "case_2_action",
-                type: "UPDATE_VARIABLE",
+                type: NodeType.UPDATE_VARIABLE,
                 name: "Case 2 Action",
                 config: { type: "update", variable_id: "result" },
                 value: "Case 2 executed",
@@ -156,7 +158,7 @@ describe("Node Types Unit Tests", () => {
             nodes: [
               {
                 id: "default_action",
-                type: "UPDATE_VARIABLE",
+                type: NodeType.UPDATE_VARIABLE,
                 name: "Default Action",
                 config: { type: "update", variable_id: "result" },
                 value: "Default case executed",
@@ -202,7 +204,7 @@ describe("Node Types Unit Tests", () => {
     test("should validate for each node structure", () => {
       const validForEachNode = {
         id: "test_foreach",
-        type: "FOR_EACH",
+        type: NodeType.FOR_EACH,
         name: "Test For Each",
         config: {
           delay_between: 1000,
@@ -214,7 +216,7 @@ describe("Node Types Unit Tests", () => {
         each_nodes: [
           {
             id: "process_item",
-            type: "UPDATE_VARIABLE",
+            type: NodeType.UPDATE_VARIABLE,
             name: "Process Current Item",
             config: { type: "join", variable_id: "results", join_str: ", " },
             value: "Processed: {{current_item}}",
@@ -282,7 +284,7 @@ describe("Node Types Unit Tests", () => {
     test("should validate variable update node structure", () => {
       const validUpdateNode = {
         id: "update_test",
-        type: "UPDATE_VARIABLE",
+        type: NodeType.UPDATE_VARIABLE,
         name: "Update Test Variable",
         config: {
           type: "update",
@@ -304,7 +306,7 @@ describe("Node Types Unit Tests", () => {
     test("should validate document splitter configuration", () => {
       const validDocumentSplitter = {
         id: "split_doc",
-        type: "DOCUMENT_SPLITTER",
+        type: NodeType.DOCUMENT_SPLITTER,
         name: "Split Document",
         config: {
           image_quality: "high",
@@ -348,7 +350,7 @@ describe("Node Types Unit Tests", () => {
     test("should validate text embedding node structure", () => {
       const validEmbeddingNode = {
         id: "embed_text",
-        type: "TEXT_EMBEDDING",
+        type: NodeType.TEXT_EMBEDDING,
         name: "Create Embeddings",
         config: {
           provider: "openai",
@@ -405,7 +407,7 @@ describe("Node Types Unit Tests", () => {
     test("should validate vector insert node", () => {
       const validVectorInsert = {
         id: "insert_vectors",
-        type: "VECTOR_INSERT",
+        type: NodeType.VECTOR_INSERT,
         name: "Insert Vectors",
         config: {
           provider: "pinecone",
@@ -433,7 +435,7 @@ describe("Node Types Unit Tests", () => {
     test("should validate vector search node", () => {
       const validVectorSearch = {
         id: "search_vectors",
-        type: "VECTOR_SEARCH",
+        type: NodeType.VECTOR_SEARCH,
         name: "Search Vectors",
         config: {
           provider: "pinecone",
@@ -461,7 +463,7 @@ describe("Node Types Unit Tests", () => {
     test("should validate vector update node", () => {
       const validVectorUpdate = {
         id: "update_vectors",
-        type: "VECTOR_UPDATE",
+        type: NodeType.VECTOR_UPDATE,
         name: "Update Vectors",
         config: {
           provider: "pinecone",
@@ -486,7 +488,7 @@ describe("Node Types Unit Tests", () => {
     test("should validate vector delete node", () => {
       const validVectorDelete = {
         id: "delete_vectors",
-        type: "VECTOR_DELETE",
+        type: NodeType.VECTOR_DELETE,
         name: "Delete Vectors",
         config: {
           provider: "pinecone",

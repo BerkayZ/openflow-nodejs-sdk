@@ -89,7 +89,12 @@ export class ToolExecutor {
         jsonStr = jsonStr.slice(3, -3).trim();
       }
 
-      const parsed = JSON.parse(jsonStr);
+      const parsed = JSON.parse(jsonStr, (key, value) => {
+        if (key === '__proto__' || key === 'constructor' || key === 'prototype') {
+          return undefined;
+        }
+        return value;
+      });
 
       if (
         parsed.tool_call &&
@@ -118,7 +123,12 @@ export class ToolExecutor {
     }
 
     try {
-      const parsed = JSON.parse(response);
+      const parsed = JSON.parse(response, (key, value) => {
+        if (key === '__proto__' || key === 'constructor' || key === 'prototype') {
+          return undefined;
+        }
+        return value;
+      });
       if (Array.isArray(parsed)) {
         for (const item of parsed) {
           if (
@@ -153,7 +163,12 @@ export class ToolExecutor {
 
     let cleanedResponse = response;
     try {
-      const parsed = JSON.parse(response);
+      const parsed = JSON.parse(response, (key, value) => {
+        if (key === '__proto__' || key === 'constructor' || key === 'prototype') {
+          return undefined;
+        }
+        return value;
+      });
       if (parsed.tool_call) {
         cleanedResponse = "";
       }

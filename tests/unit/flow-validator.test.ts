@@ -4,6 +4,7 @@
  */
 
 import { FlowValidator } from "../../core/validation/FlowValidator";
+import { NodeType } from "../../core/types";
 
 describe("FlowValidator", () => {
   describe("Schema Validation", () => {
@@ -22,7 +23,7 @@ describe("FlowValidator", () => {
         nodes: [
           {
             id: "test_node",
-            type: "UPDATE_VARIABLE",
+            type: NodeType.UPDATE_VARIABLE,
             name: "Test Node",
             config: { type: "update", variable_id: "output_var" },
             value: "{{input_var}}",
@@ -100,7 +101,7 @@ describe("FlowValidator", () => {
         nodes: [
           {
             id: "llm_node",
-            type: "LLM",
+            type: NodeType.LLM,
             name: "LLM Processing",
             config: {
               provider: "grok",
@@ -141,7 +142,7 @@ describe("FlowValidator", () => {
         nodes: [
           {
             id: "condition_node",
-            type: "CONDITION",
+            type: NodeType.CONDITION,
             name: "Score Evaluation",
             input: { switch_value: "{{score}}" },
             branches: {
@@ -151,7 +152,7 @@ describe("FlowValidator", () => {
                 nodes: [
                   {
                     id: "high_score",
-                    type: "UPDATE_VARIABLE",
+                    type: NodeType.UPDATE_VARIABLE,
                     name: "High Score",
                     config: { type: "update", variable_id: "result" },
                     value: "High score!",
@@ -162,7 +163,7 @@ describe("FlowValidator", () => {
                 nodes: [
                   {
                     id: "low_score",
-                    type: "UPDATE_VARIABLE",
+                    type: NodeType.UPDATE_VARIABLE,
                     name: "Low Score",
                     config: { type: "update", variable_id: "result" },
                     value: "Try harder!",
@@ -190,7 +191,7 @@ describe("FlowValidator", () => {
         nodes: [
           {
             id: "foreach_node",
-            type: "FOR_EACH",
+            type: NodeType.FOR_EACH,
             name: "Process Items",
             config: {
               delay_between: 100,
@@ -202,7 +203,7 @@ describe("FlowValidator", () => {
             each_nodes: [
               {
                 id: "process_item",
-                type: "UPDATE_VARIABLE",
+                type: NodeType.UPDATE_VARIABLE,
                 name: "Process Current Item",
                 config: {
                   type: "join",
@@ -234,14 +235,14 @@ describe("FlowValidator", () => {
         nodes: [
           {
             id: "node_a",
-            type: "UPDATE_VARIABLE",
+            type: NodeType.UPDATE_VARIABLE,
             name: "Node A",
             config: { type: "update", variable_id: "result" },
             value: "{{node_b.output}}", // Forward reference
           },
           {
             id: "node_b",
-            type: "UPDATE_VARIABLE",
+            type: NodeType.UPDATE_VARIABLE,
             name: "Node B",
             config: { type: "update", variable_id: "result" },
             value: "valid value",
@@ -269,14 +270,14 @@ describe("FlowValidator", () => {
         nodes: [
           {
             id: "node_a",
-            type: "UPDATE_VARIABLE",
+            type: NodeType.UPDATE_VARIABLE,
             name: "Node A",
             config: { type: "update", variable_id: "result" },
             value: "{{node_b.output}}",
           },
           {
             id: "node_b",
-            type: "UPDATE_VARIABLE",
+            type: NodeType.UPDATE_VARIABLE,
             name: "Node B",
             config: { type: "update", variable_id: "result" },
             value: "{{node_a.output}}",
@@ -303,7 +304,7 @@ describe("FlowValidator", () => {
         nodes: [
           {
             id: "interpolation_node",
-            type: "UPDATE_VARIABLE",
+            type: NodeType.UPDATE_VARIABLE,
             name: "Interpolation Test",
             config: { type: "update", variable_id: "output_var" },
             value: "Hello {{input_var}}!", // Valid interpolation
@@ -329,14 +330,14 @@ describe("FlowValidator", () => {
         nodes: [
           {
             id: "duplicate_id",
-            type: "UPDATE_VARIABLE",
+            type: NodeType.UPDATE_VARIABLE,
             name: "Node 1",
             config: { type: "update", variable_id: "result" },
             value: "value1",
           },
           {
             id: "duplicate_id", // Duplicate ID
-            type: "UPDATE_VARIABLE",
+            type: NodeType.UPDATE_VARIABLE,
             name: "Node 2",
             config: { type: "update", variable_id: "result" },
             value: "value2",

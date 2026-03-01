@@ -4,7 +4,7 @@
  */
 
 import { FlowExecutor } from "../../core/executor/FlowExecutor";
-import { FlowExecutorConfig } from "../../core/types";
+import { FlowExecutorConfig, NodeType } from "../../core/types";
 
 describe("MCP Integration Tests", () => {
   let executor: FlowExecutor;
@@ -56,7 +56,7 @@ describe("MCP Integration Tests", () => {
         nodes: [
           {
             id: "research_with_mcp",
-            type: "LLM",
+            type: NodeType.LLM,
             name: "Research with DeepWiki MCP",
             config: {
               provider: "grok",
@@ -107,7 +107,7 @@ describe("MCP Integration Tests", () => {
           },
           {
             id: "save_research",
-            type: "UPDATE_VARIABLE",
+            type: NodeType.UPDATE_VARIABLE,
             name: "Save Research Result",
             config: { type: "update", variable_id: "research_result" },
             value: "{{research_with_mcp.summary}}",
@@ -144,7 +144,7 @@ describe("MCP Integration Tests", () => {
         nodes: [
           {
             id: "analyze_with_semgrep",
-            type: "LLM",
+            type: NodeType.LLM,
             name: "Analyze Code with Semgrep MCP",
             config: {
               provider: "grok",
@@ -193,7 +193,7 @@ describe("MCP Integration Tests", () => {
           },
           {
             id: "save_analysis",
-            type: "UPDATE_VARIABLE",
+            type: NodeType.UPDATE_VARIABLE,
             name: "Save Analysis Result",
             config: { type: "update", variable_id: "analysis_result" },
             value: "{{analyze_with_semgrep.analysis}}",
@@ -238,7 +238,7 @@ describe("MCP Integration Tests", () => {
         nodes: [
           {
             id: "get_crypto_data",
-            type: "LLM",
+            type: NodeType.LLM,
             name: "Get Crypto Data with CoinGecko MCP",
             config: {
               provider: "grok",
@@ -287,7 +287,7 @@ describe("MCP Integration Tests", () => {
           },
           {
             id: "save_analysis",
-            type: "UPDATE_VARIABLE",
+            type: NodeType.UPDATE_VARIABLE,
             name: "Save Price Analysis",
             config: { type: "update", variable_id: "price_analysis" },
             value: "{{get_crypto_data.analysis}}",
@@ -323,7 +323,7 @@ describe("MCP Integration Tests", () => {
         nodes: [
           {
             id: "timeout_test",
-            type: "LLM",
+            type: NodeType.LLM,
             name: "MCP Timeout Test",
             config: {
               provider: "grok",
@@ -385,7 +385,7 @@ describe("MCP Integration Tests", () => {
         nodes: [
           {
             id: "auth_test",
-            type: "LLM",
+            type: NodeType.LLM,
             name: "MCP Auth Test",
             config: {
               provider: "grok",
@@ -450,7 +450,7 @@ describe("MCP Integration Tests", () => {
         nodes: [
           {
             id: "multi_mcp_research",
-            type: "LLM",
+            type: NodeType.LLM,
             name: "Research with Multiple MCP Servers",
             config: {
               provider: "grok",
@@ -503,7 +503,7 @@ describe("MCP Integration Tests", () => {
           },
           {
             id: "save_combined",
-            type: "UPDATE_VARIABLE",
+            type: NodeType.UPDATE_VARIABLE,
             name: "Save Combined Result",
             config: { type: "update", variable_id: "combined_result" },
             value: "{{multi_mcp_research.research_result}}",

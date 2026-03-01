@@ -36,6 +36,7 @@ export class FlowExecutor {
   private runningFlows: Set<string> = new Set();
   private executionCounter = 0;
   private logger: Logger;
+  private queueLock: Promise<void> = Promise.resolve();
 
   constructor(config: FlowExecutorConfig) {
     this.config = config;
@@ -257,18 +258,21 @@ export class FlowExecutor {
    * Process the execution queue respecting concurrency limits
    */
   private async processQueue(): Promise<void> {
-    const availableSlots =
-      this.config.concurrency.global_limit - this.runningFlows.size;
+    this.queueLock = this.queueLock.then(async () => {
+      const availableSlots =
+        this.config.concurrency.global_limit - this.runningFlows.size;
 
-    if (availableSlots <= 0 || this.executionQueue.length === 0) {
-      return;
-    }
+      if (availableSlots <= 0 || this.executionQueue.length === 0) {
+        return;
+      }
 
-    // Start as many flows as we have slots for
-    for (let i = 0; i < availableSlots && this.executionQueue.length > 0; i++) {
-      const queuedFlow = this.executionQueue.shift()!;
-      this.executeFlowInternal(queuedFlow);
-    }
+      // Start as many flows as we have slots for
+      for (let i = 0; i < availableSlots && this.executionQueue.length > 0; i++) {
+        const queuedFlow = this.executionQueue.shift()!;
+        this.executeFlowInternal(queuedFlow);
+      }
+    });
+    return this.queueLock;
   }
 
   /**

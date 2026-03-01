@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach } from '@jest/globals';
 import { MockLLMProvider } from '../mocks/MockLLMProvider';
-import { LLMConfig, Message } from '../../src/core/types';
+import { Message } from '../../core/types';
 
 describe('LLMNode Tests', () => {
     let provider: MockLLMProvider;
@@ -12,7 +12,7 @@ describe('LLMNode Tests', () => {
     describe('MockLLMProvider', () => {
         it('should generate completion without API keys', async () => {
             const messages: Message[] = [
-                { role: 'user', content: 'test' }
+                { type: 'text', role: 'user', text: 'test' }
             ];
 
             const response = await provider.generateCompletion(messages);
@@ -27,7 +27,7 @@ describe('LLMNode Tests', () => {
             provider.addMockResponse('custom', '{"custom": "response"}');
 
             const messages: Message[] = [
-                { role: 'user', content: 'This is a custom prompt' }
+                { type: 'text', role: 'user', text: 'This is a custom prompt' }
             ];
 
             const response = await provider.generateCompletion(messages);
@@ -37,7 +37,7 @@ describe('LLMNode Tests', () => {
 
         it('should return default response for unmatched prompts', async () => {
             const messages: Message[] = [
-                { role: 'user', content: 'unknown prompt' }
+                { type: 'text', role: 'user', text: 'unknown prompt' }
             ];
 
             const response = await provider.generateCompletion(messages);
@@ -47,8 +47,8 @@ describe('LLMNode Tests', () => {
 
         it('should handle system messages', async () => {
             const messages: Message[] = [
-                { role: 'system', content: 'You are a helpful assistant' },
-                { role: 'user', content: 'hello' }
+                { type: 'text', role: 'system', text: 'You are a helpful assistant' },
+                { type: 'text', role: 'user', text: 'hello' }
             ];
 
             const response = await provider.generateCompletion(messages);
@@ -58,9 +58,9 @@ describe('LLMNode Tests', () => {
 
         it('should support multiple messages', async () => {
             const messages: Message[] = [
-                { role: 'user', content: 'First message' },
-                { role: 'assistant', content: 'First response' },
-                { role: 'user', content: 'analyze this' }
+                { type: 'text', role: 'user', text: 'First message' },
+                { type: 'text', role: 'assistant', text: 'First response' },
+                { type: 'text', role: 'user', text: 'analyze this' }
             ];
 
             const response = await provider.generateCompletion(messages);
@@ -72,7 +72,7 @@ describe('LLMNode Tests', () => {
 
     describe('Retry Policy', () => {
         it('should handle retry configuration', async () => {
-            const config: LLMConfig = {
+            const config = {
                 model: 'test-model',
                 retry: {
                     max_attempts: 3,
@@ -82,7 +82,7 @@ describe('LLMNode Tests', () => {
 
             const providerWithRetry = new MockLLMProvider(config);
             const messages: Message[] = [
-                { role: 'user', content: 'test' }
+                { type: 'text', role: 'user', text: 'test' }
             ];
 
             // Should work normally (mocked provider doesn't fail)

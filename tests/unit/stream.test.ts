@@ -1,6 +1,11 @@
 import { describe, it, expect, beforeEach } from '@jest/globals';
 import { MockLLMProvider } from '../mocks/MockLLMProvider';
-import { Message, StreamToken } from '../../src/core/types';
+import { Message } from '../../core/types';
+
+interface StreamToken {
+    content: string;
+    role: 'assistant' | 'user' | 'system';
+}
 
 describe('Stream Tests', () => {
     let provider: MockLLMProvider;
@@ -12,7 +17,7 @@ describe('Stream Tests', () => {
     describe('Stream Generation', () => {
         it('should stream tokens progressively', async () => {
             const messages: Message[] = [
-                { role: 'user', content: 'test' }
+                { type: 'text', role: 'user', text: 'test' }
             ];
 
             const receivedTokens: StreamToken[] = [];
@@ -42,7 +47,7 @@ describe('Stream Tests', () => {
 
         it('should work without stream callback', async () => {
             const messages: Message[] = [
-                { role: 'user', content: 'hello' }
+                { type: 'text', role: 'user', text: 'hello' }
             ];
 
             const response = await provider.generateCompletionStream(messages);
@@ -56,7 +61,7 @@ describe('Stream Tests', () => {
             provider.addMockResponse('stream-test', '{"streaming": "works perfectly"}');
 
             const messages: Message[] = [
-                { role: 'user', content: 'stream-test' }
+                { type: 'text', role: 'user', text: 'stream-test' }
             ];
 
             const chunks: string[] = [];
@@ -84,7 +89,7 @@ describe('Stream Tests', () => {
 
         it('should maintain token usage in streamed response', async () => {
             const messages: Message[] = [
-                { role: 'user', content: 'analyze' }
+                { type: 'text', role: 'user', text: 'analyze' }
             ];
 
             const response = await provider.generateCompletionStream(
@@ -103,7 +108,7 @@ describe('Stream Tests', () => {
     describe('Stream Error Handling', () => {
         it('should handle stream interruption gracefully', async () => {
             const messages: Message[] = [
-                { role: 'user', content: 'test' }
+                { type: 'text', role: 'user', text: 'test' }
             ];
 
             let tokenCount = 0;

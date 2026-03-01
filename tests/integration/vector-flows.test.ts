@@ -4,7 +4,7 @@
  */
 
 import { FlowExecutor } from "../../core/executor/FlowExecutor";
-import { FlowExecutorConfig } from "../../core/types";
+import { FlowExecutorConfig, NodeType } from "../../core/types";
 
 describe("Vector Database Integration Tests", () => {
   let executor: FlowExecutor;
@@ -58,7 +58,7 @@ describe("Vector Database Integration Tests", () => {
         nodes: [
           {
             id: "create_embedding",
-            type: "TEXT_EMBEDDING",
+            type: NodeType.TEXT_EMBEDDING,
             name: "Create Text Embedding",
             config: {
               provider: "openai",
@@ -70,7 +70,7 @@ describe("Vector Database Integration Tests", () => {
           },
           {
             id: "save_embedding",
-            type: "UPDATE_VARIABLE",
+            type: NodeType.UPDATE_VARIABLE,
             name: "Save Embedding",
             config: { type: "update", variable_id: "embedding_result" },
             value: "{{create_embedding.embedding}}",
@@ -107,7 +107,7 @@ describe("Vector Database Integration Tests", () => {
         nodes: [
           {
             id: "create_embeddings",
-            type: "TEXT_EMBEDDING",
+            type: NodeType.TEXT_EMBEDDING,
             name: "Create Multiple Embeddings",
             config: {
               provider: "openai",
@@ -119,7 +119,7 @@ describe("Vector Database Integration Tests", () => {
           },
           {
             id: "save_embeddings",
-            type: "UPDATE_VARIABLE",
+            type: NodeType.UPDATE_VARIABLE,
             name: "Save Embeddings",
             config: { type: "update", variable_id: "embeddings_result" },
             value: "{{create_embeddings.embeddings}}",
@@ -155,7 +155,7 @@ describe("Vector Database Integration Tests", () => {
         nodes: [
           {
             id: "create_embeddings_with_metadata",
-            type: "TEXT_EMBEDDING",
+            type: NodeType.TEXT_EMBEDDING,
             name: "Create Embeddings with Metadata",
             config: {
               provider: "openai",
@@ -167,7 +167,7 @@ describe("Vector Database Integration Tests", () => {
           },
           {
             id: "save_embeddings",
-            type: "UPDATE_VARIABLE",
+            type: NodeType.UPDATE_VARIABLE,
             name: "Save Embeddings",
             config: { type: "update", variable_id: "embedding_result" },
             value: "{{create_embeddings_with_metadata.embeddings}}",
@@ -220,7 +220,7 @@ describe("Vector Database Integration Tests", () => {
         nodes: [
           {
             id: "create_embedding",
-            type: "TEXT_EMBEDDING",
+            type: NodeType.TEXT_EMBEDDING,
             name: "Create Embedding",
             config: {
               provider: "openai",
@@ -238,7 +238,7 @@ describe("Vector Database Integration Tests", () => {
           },
           {
             id: "insert_vector",
-            type: "VECTOR_INSERT",
+            type: NodeType.VECTOR_INSERT,
             name: "Insert Vector",
             config: {
               provider: "pinecone",
@@ -251,7 +251,7 @@ describe("Vector Database Integration Tests", () => {
           },
           {
             id: "save_result",
-            type: "UPDATE_VARIABLE",
+            type: NodeType.UPDATE_VARIABLE,
             name: "Save Insert Result",
             config: { type: "update", variable_id: "insert_result" },
             value: "{{insert_vector.result}}",
@@ -285,14 +285,14 @@ describe("Vector Database Integration Tests", () => {
         nodes: [
           {
             id: "embed_query",
-            type: "TEXT_EMBEDDING",
+            type: NodeType.TEXT_EMBEDDING,
             name: "Embed Search Query",
             config: { provider: "openai", model: "text-embedding-ada-002" },
             input: { text: "{{search_query}}" },
           },
           {
             id: "search_vectors",
-            type: "VECTOR_SEARCH",
+            type: NodeType.VECTOR_SEARCH,
             name: "Search Vector Database",
             config: {
               provider: "pinecone",
@@ -305,7 +305,7 @@ describe("Vector Database Integration Tests", () => {
           },
           {
             id: "save_search_results",
-            type: "UPDATE_VARIABLE",
+            type: NodeType.UPDATE_VARIABLE,
             name: "Save Search Results",
             config: { type: "update", variable_id: "search_results" },
             value: "{{search_vectors.results}}",
@@ -338,7 +338,7 @@ describe("Vector Database Integration Tests", () => {
         nodes: [
           {
             id: "process_documents",
-            type: "FOR_EACH",
+            type: NodeType.FOR_EACH,
             name: "Process Each Document",
             config: {
               delay_between: 500,
@@ -350,7 +350,7 @@ describe("Vector Database Integration Tests", () => {
             each_nodes: [
               {
                 id: "embed_document",
-                type: "TEXT_EMBEDDING",
+                type: NodeType.TEXT_EMBEDDING,
                 name: "Embed Document",
                 config: {
                   provider: "openai",
@@ -368,7 +368,7 @@ describe("Vector Database Integration Tests", () => {
               },
               {
                 id: "store_embedding",
-                type: "VECTOR_INSERT",
+                type: NodeType.VECTOR_INSERT,
                 name: "Store Embedding",
                 config: {
                   provider: "pinecone",
@@ -384,7 +384,7 @@ describe("Vector Database Integration Tests", () => {
           },
           {
             id: "save_storage_result",
-            type: "UPDATE_VARIABLE",
+            type: NodeType.UPDATE_VARIABLE,
             name: "Save Storage Result",
             config: { type: "update", variable_id: "storage_result" },
             value: "All documents processed and stored successfully",
@@ -434,7 +434,7 @@ describe("Vector Database Integration Tests", () => {
         nodes: [
           {
             id: "invalid_embedding",
-            type: "TEXT_EMBEDDING",
+            type: NodeType.TEXT_EMBEDDING,
             name: "Invalid Embedding",
             config: {
               provider: "openai",
@@ -478,7 +478,7 @@ describe("Vector Database Integration Tests", () => {
         nodes: [
           {
             id: "invalid_insert",
-            type: "VECTOR_INSERT",
+            type: NodeType.VECTOR_INSERT,
             name: "Invalid Insert",
             config: {
               provider: "pinecone",

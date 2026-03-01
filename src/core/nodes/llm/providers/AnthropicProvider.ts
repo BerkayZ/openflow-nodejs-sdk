@@ -149,11 +149,21 @@ export class AnthropicProvider extends LLMProvider {
             this.httpClient.requestSSE('/v1/messages', options, async (event) => {
                 try {
                     if (event.event === 'message_start') {
-                        const data = JSON.parse(event.data);
+                        const data = JSON.parse(event.data, (key, value) => {
+                          if (key === '__proto__' || key === 'constructor' || key === 'prototype') {
+                            return undefined;
+                          }
+                          return value;
+                        });
                         model = data.message.model;
                         totalTokens = data.message.usage?.input_tokens || 0;
                     } else if (event.event === 'content_block_delta') {
-                        const data = JSON.parse(event.data);
+                        const data = JSON.parse(event.data, (key, value) => {
+                          if (key === '__proto__' || key === 'constructor' || key === 'prototype') {
+                            return undefined;
+                          }
+                          return value;
+                        });
                         const content = data.delta.text;
 
                         if (content) {
@@ -168,7 +178,12 @@ export class AnthropicProvider extends LLMProvider {
                             }
                         }
                     } else if (event.event === 'message_delta') {
-                        const data = JSON.parse(event.data);
+                        const data = JSON.parse(event.data, (key, value) => {
+                          if (key === '__proto__' || key === 'constructor' || key === 'prototype') {
+                            return undefined;
+                          }
+                          return value;
+                        });
                         if (data.usage) {
                             totalTokens = (data.usage.input_tokens || 0) + (data.usage.output_tokens || 0);
                         }
@@ -184,7 +199,12 @@ export class AnthropicProvider extends LLMProvider {
                             finish_reason: 'stop'
                         });
                     } else if (event.event === 'error') {
-                        const errorData = JSON.parse(event.data);
+                        const errorData = JSON.parse(event.data, (key, value) => {
+                          if (key === '__proto__' || key === 'constructor' || key === 'prototype') {
+                            return undefined;
+                          }
+                          return value;
+                        });
                         reject(new ValidationError(`Anthropic API error: ${errorData.error?.message || 'Unknown error'}`));
                     }
                 } catch (error) {

@@ -4,7 +4,7 @@
  */
 
 import { FlowExecutor } from "../../core/executor/FlowExecutor";
-import { FlowExecutorConfig } from "../../core/types";
+import { FlowExecutorConfig, NodeType } from "../../core/types";
 
 describe("FlowExecutor", () => {
   let executor: FlowExecutor;
@@ -58,7 +58,7 @@ describe("FlowExecutor", () => {
         nodes: [
           {
             id: "llm_process",
-            type: "LLM",
+            type: NodeType.LLM,
             name: "Process with LLM",
             config: { provider: "grok", model: "grok-3-latest" },
             messages: [
@@ -77,7 +77,7 @@ describe("FlowExecutor", () => {
           },
           {
             id: "save_response",
-            type: "UPDATE_VARIABLE",
+            type: NodeType.UPDATE_VARIABLE,
             name: "Save Response",
             config: { type: "update", variable_id: "llm_response" },
             value: "{{llm_process.explanation}}",
@@ -120,7 +120,7 @@ describe("FlowExecutor", () => {
         nodes: [
           {
             id: "update_var",
-            type: "UPDATE_VARIABLE",
+            type: NodeType.UPDATE_VARIABLE,
             name: "Update Variable",
             config: { type: "update", variable_id: "output_text" },
             value: "Processed: {{input_text}}",
@@ -150,7 +150,7 @@ describe("FlowExecutor", () => {
         nodes: [
           {
             id: "score_evaluation",
-            type: "CONDITION",
+            type: NodeType.CONDITION,
             name: "Evaluate Score",
             input: { switch_value: "{{user_score}}" },
             branches: {
@@ -160,7 +160,7 @@ describe("FlowExecutor", () => {
                 nodes: [
                   {
                     id: "excellent_badge",
-                    type: "UPDATE_VARIABLE",
+                    type: NodeType.UPDATE_VARIABLE,
                     name: "Award Excellent Badge",
                     config: { type: "update", variable_id: "final_message" },
                     value: "Excellent! Score: {{user_score}}",
@@ -173,7 +173,7 @@ describe("FlowExecutor", () => {
                 nodes: [
                   {
                     id: "good_badge",
-                    type: "UPDATE_VARIABLE",
+                    type: NodeType.UPDATE_VARIABLE,
                     name: "Award Good Badge",
                     config: { type: "update", variable_id: "final_message" },
                     value: "Good work! Score: {{user_score}}",
@@ -184,7 +184,7 @@ describe("FlowExecutor", () => {
                 nodes: [
                   {
                     id: "needs_improvement",
-                    type: "UPDATE_VARIABLE",
+                    type: NodeType.UPDATE_VARIABLE,
                     name: "Needs Improvement",
                     config: { type: "update", variable_id: "final_message" },
                     value: "Keep improving! Score: {{user_score}}",
@@ -230,7 +230,7 @@ describe("FlowExecutor", () => {
         nodes: [
           {
             id: "process_items",
-            type: "FOR_EACH",
+            type: NodeType.FOR_EACH,
             name: "Process Items",
             config: {
               delay_between: 0,
@@ -242,7 +242,7 @@ describe("FlowExecutor", () => {
             each_nodes: [
               {
                 id: "process_current",
-                type: "UPDATE_VARIABLE",
+                type: NodeType.UPDATE_VARIABLE,
                 name: "Process Current Item",
                 config: {
                   type: "join",
@@ -318,14 +318,14 @@ describe("FlowExecutor", () => {
         nodes: [
           {
             id: "node_a",
-            type: "UPDATE_VARIABLE",
+            type: NodeType.UPDATE_VARIABLE,
             name: "Node A",
             config: { type: "update", variable_id: "result" },
             value: "{{node_b.output}}",
           },
           {
             id: "node_b",
-            type: "UPDATE_VARIABLE",
+            type: NodeType.UPDATE_VARIABLE,
             name: "Node B",
             config: { type: "update", variable_id: "result" },
             value: "{{node_a.output}}",

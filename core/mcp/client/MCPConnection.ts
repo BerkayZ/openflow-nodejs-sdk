@@ -138,8 +138,6 @@ export class MCPConnectionManager {
         signal: controller.signal,
       });
 
-      clearTimeout(timeoutId);
-
       if (!response.ok) {
         throw new Error(`HTTP ${response.status}: ${response.statusText}`);
       }
@@ -166,8 +164,6 @@ export class MCPConnectionManager {
         return data as MCPResponse;
       }
     } catch (error) {
-      clearTimeout(timeoutId);
-
       if (error instanceof Error) {
         if (error.name === "AbortError") {
           throw new Error(`Request timeout after ${timeout}ms`);
@@ -175,6 +171,8 @@ export class MCPConnectionManager {
         throw error;
       }
       throw new Error(`Request failed: ${String(error)}`);
+    } finally {
+      clearTimeout(timeoutId);
     }
   }
 
@@ -192,7 +190,12 @@ export class MCPConnectionManager {
         // If this is a message event with JSON data, parse and return it
         if (eventType === "message") {
           try {
-            return JSON.parse(data);
+            return JSON.parse(data, (key, value) => {
+              if (key === '__proto__' || key === 'constructor' || key === 'prototype') {
+                return undefined;
+              }
+              return value;
+            });
           } catch (error) {
             console.warn("Failed to parse SSE JSON data:", data);
           }

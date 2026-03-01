@@ -4,7 +4,7 @@
  */
 
 import { FlowExecutor } from "../../core/executor/FlowExecutor";
-import { FlowExecutorConfig } from "../../core/types";
+import { FlowExecutorConfig, NodeType } from "../../core/types";
 
 describe("LLM Integration Tests", () => {
   let executor: FlowExecutor;
@@ -60,7 +60,7 @@ describe("LLM Integration Tests", () => {
         nodes: [
           {
             id: "llm_process",
-            type: "LLM",
+            type: NodeType.LLM,
             name: "Process with Grok",
             config: {
               provider: "grok",
@@ -89,7 +89,7 @@ describe("LLM Integration Tests", () => {
           },
           {
             id: "save_response",
-            type: "UPDATE_VARIABLE",
+            type: NodeType.UPDATE_VARIABLE,
             name: "Save Response",
             config: { type: "update", variable_id: "llm_response" },
             value: "{{llm_process.response}}",
@@ -124,7 +124,7 @@ describe("LLM Integration Tests", () => {
         nodes: [
           {
             id: "analyze_text",
-            type: "LLM",
+            type: NodeType.LLM,
             name: "Analyze Text",
             config: {
               provider: "grok",
@@ -162,7 +162,7 @@ describe("LLM Integration Tests", () => {
           },
           {
             id: "save_analysis",
-            type: "UPDATE_VARIABLE",
+            type: NodeType.UPDATE_VARIABLE,
             name: "Save Analysis",
             config: { type: "update", variable_id: "analysis_result" },
             value: "{{analyze_text}}",
@@ -200,7 +200,7 @@ describe("LLM Integration Tests", () => {
         nodes: [
           {
             id: "generate_content",
-            type: "LLM",
+            type: NodeType.LLM,
             name: "Generate Content",
             config: {
               provider: "grok",
@@ -224,7 +224,7 @@ describe("LLM Integration Tests", () => {
           },
           {
             id: "save_result",
-            type: "UPDATE_VARIABLE",
+            type: NodeType.UPDATE_VARIABLE,
             name: "Save Result",
             config: { type: "update", variable_id: "result" },
             value: "{{generate_content.content}}",
@@ -262,7 +262,7 @@ describe("LLM Integration Tests", () => {
         nodes: [
           {
             id: "invalid_model",
-            type: "LLM",
+            type: NodeType.LLM,
             name: "Invalid Model",
             config: {
               provider: "grok",
@@ -307,7 +307,7 @@ describe("LLM Integration Tests", () => {
         nodes: [
           {
             id: "quick_request",
-            type: "LLM",
+            type: NodeType.LLM,
             name: "Quick Request",
             config: {
               provider: "grok",
@@ -362,7 +362,7 @@ describe("LLM Integration Tests", () => {
         nodes: [
           {
             id: "long_request",
-            type: "LLM",
+            type: NodeType.LLM,
             name: "Long Request",
             config: {
               provider: "grok",

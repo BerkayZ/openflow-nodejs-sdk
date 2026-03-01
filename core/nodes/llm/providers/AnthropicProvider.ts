@@ -183,7 +183,7 @@ export class AnthropicProvider extends BaseProvider {
       let completionTokens = 0;
 
       return new Promise((resolve, reject) => {
-        response.data.on("data", (chunk: Buffer) => {
+        const dataHandler = (chunk: Buffer) => {
           const lines = chunk.toString().split("\n").filter(Boolean);
 
           for (const line of lines) {
@@ -194,7 +194,12 @@ export class AnthropicProvider extends BaseProvider {
               }
 
               try {
-                const parsed = JSON.parse(data);
+                const parsed = JSON.parse(data, (key, value) => {
+                  if (key === '__proto__' || key === 'constructor' || key === 'prototype') {
+                    return undefined;
+                  }
+                  return value;
+                });
 
                 // Handle different event types
                 if (parsed.type === "message_start") {
@@ -220,6 +225,11 @@ export class AnthropicProvider extends BaseProvider {
                     totalTokens = promptTokens + completionTokens;
                   }
                 } else if (parsed.type === "message_stop") {
+                  // Clean up event listeners before resolving
+                  response.data.removeListener('data', dataHandler);
+                  response.data.removeListener('error', errorHandler);
+                  response.data.removeListener('end', endHandler);
+
                   // Stream completed
                   resolve({
                     content: fullContent,
@@ -235,13 +245,22 @@ export class AnthropicProvider extends BaseProvider {
               }
             }
           }
-        });
+        };
 
-        response.data.on("error", (error: Error) => {
+        const errorHandler = (error: Error) => {
+          // Clean up event listeners
+          response.data.removeListener('data', dataHandler);
+          response.data.removeListener('error', errorHandler);
+          response.data.removeListener('end', endHandler);
           reject(new Error(`Stream error: ${error.message}`));
-        });
+        };
 
-        response.data.on("end", () => {
+        const endHandler = () => {
+          // Clean up event listeners
+          response.data.removeListener('data', dataHandler);
+          response.data.removeListener('error', errorHandler);
+          response.data.removeListener('end', endHandler);
+
           // If we haven't resolved yet, do it now
           if (fullContent) {
             resolve({
@@ -253,7 +272,12 @@ export class AnthropicProvider extends BaseProvider {
               },
             });
           }
-        });
+        };
+
+        // Attach event handlers
+        response.data.on('data', dataHandler);
+        response.data.on('error', errorHandler);
+        response.data.on('end', endHandler);
       });
     } catch (error) {
       if (axios.isAxiosError(error)) {

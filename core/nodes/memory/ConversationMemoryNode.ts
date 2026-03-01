@@ -191,7 +191,12 @@ export class ConversationMemoryNode extends BaseNode {
     let messages: ConversationMessage[];
 
     try {
-      messages = JSON.parse(serialized);
+      messages = JSON.parse(serialized, (key, value) => {
+        if (key === '__proto__' || key === 'constructor' || key === 'prototype') {
+          return undefined;
+        }
+        return value;
+      });
     } catch (error) {
       throw new Error(`Failed to deserialize messages: ${error}`);
     }

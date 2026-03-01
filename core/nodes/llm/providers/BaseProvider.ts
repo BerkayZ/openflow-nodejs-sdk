@@ -84,7 +84,12 @@ export abstract class BaseProvider {
         jsonStr = trimmed.slice(3, -3);
       }
 
-      return JSON.parse(jsonStr);
+      return JSON.parse(jsonStr, (key, value) => {
+        if (key === '__proto__' || key === 'constructor' || key === 'prototype') {
+          return undefined;
+        }
+        return value;
+      });
     } catch (error) {
       throw new Error(
         `Failed to parse JSON response: ${error instanceof Error ? error.message : String(error)}`,
