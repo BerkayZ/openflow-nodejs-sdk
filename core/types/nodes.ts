@@ -229,7 +229,11 @@ export type ConditionOperator =
   | "greater_than"
   | "less_than"
   | "contains"
-  | "not_equals";
+  | "not_equals"
+  | "not_contains"
+  | "starts_with"
+  | "ends_with"
+  | "regex";
 
 export interface ConditionBranch {
   condition?: ConditionOperator;

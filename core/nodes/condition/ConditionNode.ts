@@ -109,6 +109,51 @@ export class ConditionNodeExecutor extends BaseNode {
         }
         return false;
 
+      case "not_contains":
+        if (
+          typeof switchValue === "string" &&
+          typeof conditionValue === "string"
+        ) {
+          return !switchValue.includes(conditionValue);
+        }
+        if (Array.isArray(switchValue)) {
+          return !switchValue.includes(conditionValue);
+        }
+        return true;
+
+      case "starts_with":
+        if (
+          typeof switchValue === "string" &&
+          typeof conditionValue === "string"
+        ) {
+          return switchValue.startsWith(conditionValue);
+        }
+        return false;
+
+      case "ends_with":
+        if (
+          typeof switchValue === "string" &&
+          typeof conditionValue === "string"
+        ) {
+          return switchValue.endsWith(conditionValue);
+        }
+        return false;
+
+      case "regex":
+        if (
+          typeof switchValue === "string" &&
+          typeof conditionValue === "string"
+        ) {
+          try {
+            const regex = new RegExp(conditionValue);
+            return regex.test(switchValue);
+          } catch (e) {
+            // Invalid regex pattern
+            return false;
+          }
+        }
+        return false;
+
       default:
         throw new Error(`Unknown condition operator: ${condition}`);
     }
