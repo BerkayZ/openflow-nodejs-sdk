@@ -65,7 +65,7 @@ describe("FlowExecutor", () => {
               {
                 type: "text",
                 role: "user",
-                text: "{{user_prompt}}",
+                text: "{{@user_prompt}}",
               },
             ],
             output: {
@@ -123,7 +123,7 @@ describe("FlowExecutor", () => {
             type: NodeType.UPDATE_VARIABLE,
             name: "Update Variable",
             config: { type: "update", variable_id: "output_text" },
-            value: "Processed: {{input_text}}",
+            value: "Processed: {{@input_text}}",
           },
         ],
       };
@@ -152,7 +152,7 @@ describe("FlowExecutor", () => {
             id: "score_evaluation",
             type: NodeType.CONDITION,
             name: "Evaluate Score",
-            input: { switch_value: "{{user_score}}" },
+            input: { switch_value: "{{@user_score}}" },
             branches: {
               excellent: {
                 condition: "greater_than",
@@ -163,7 +163,7 @@ describe("FlowExecutor", () => {
                     type: NodeType.UPDATE_VARIABLE,
                     name: "Award Excellent Badge",
                     config: { type: "update", variable_id: "final_message" },
-                    value: "Excellent! Score: {{user_score}}",
+                    value: "Excellent! Score: {{@user_score}}",
                   },
                 ],
               },
@@ -176,7 +176,7 @@ describe("FlowExecutor", () => {
                     type: NodeType.UPDATE_VARIABLE,
                     name: "Award Good Badge",
                     config: { type: "update", variable_id: "final_message" },
-                    value: "Good work! Score: {{user_score}}",
+                    value: "Good work! Score: {{@user_score}}",
                   },
                 ],
               },
@@ -187,7 +187,7 @@ describe("FlowExecutor", () => {
                     type: NodeType.UPDATE_VARIABLE,
                     name: "Needs Improvement",
                     config: { type: "update", variable_id: "final_message" },
-                    value: "Keep improving! Score: {{user_score}}",
+                    value: "Keep improving! Score: {{@user_score}}",
                   },
                 ],
               },
@@ -237,7 +237,7 @@ describe("FlowExecutor", () => {
               each_key: "current",
             },
             input: {
-              items: "{{items}}",
+              items: "{{@items}}",
             },
             each_nodes: [
               {
@@ -249,7 +249,7 @@ describe("FlowExecutor", () => {
                   variable_id: "processed_items",
                   join_str: ", ",
                 },
-                value: "Processed: {{current}}",
+                value: "Processed: {{@current}}",
               },
             ],
           },

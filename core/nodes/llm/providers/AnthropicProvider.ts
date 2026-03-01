@@ -6,7 +6,12 @@
  * If not included, see <https://www.gnu.org/licenses/gpl-3.0.en.html>
  */
 
-import { BaseProvider, LLMMessage, LLMResponse, StreamChunk } from "./BaseProvider";
+import {
+  BaseProvider,
+  LLMMessage,
+  LLMResponse,
+  StreamChunk,
+} from "./BaseProvider";
 import { ProviderConfig, OutputSchema } from "../../../types";
 import { PromptBuilder } from "../PromptBuilder";
 
@@ -33,7 +38,10 @@ export class AnthropicProvider extends BaseProvider {
     }
   }
 
-  private formatMessages(messages: LLMMessage[]): { system?: string; messages: any[] } {
+  private formatMessages(messages: LLMMessage[]): {
+    system?: string;
+    messages: any[];
+  } {
     const formattedMessages: any[] = [];
     let systemPrompt: string | undefined;
 
@@ -50,7 +58,7 @@ export class AnthropicProvider extends BaseProvider {
       } else {
         formattedMessages.push({
           role: message.role === "user" ? "user" : "assistant",
-          content: message.content
+          content: message.content,
         });
       }
     }
@@ -114,7 +122,10 @@ export class AnthropicProvider extends BaseProvider {
 
     try {
       const controller = new AbortController();
-      const timeout = setTimeout(() => controller.abort(), this.config.timeout || 60000);
+      const timeout = setTimeout(
+        () => controller.abort(),
+        this.config.timeout || 60000,
+      );
 
       const response = await fetch(AnthropicProvider.API_URL, {
         method: "POST",
@@ -131,7 +142,9 @@ export class AnthropicProvider extends BaseProvider {
 
       if (!response.ok) {
         const errorText = await response.text();
-        throw new Error(`Anthropic API error: ${response.status} - ${errorText}`);
+        throw new Error(
+          `Anthropic API error: ${response.status} - ${errorText}`,
+        );
       }
 
       const data = await response.json();
@@ -153,8 +166,10 @@ export class AnthropicProvider extends BaseProvider {
           : undefined,
       };
     } catch (error) {
-      if (error instanceof Error && error.name === 'AbortError') {
-        throw new Error(`Anthropic API request timed out after ${this.config.timeout || 60000}ms`);
+      if (error instanceof Error && error.name === "AbortError") {
+        throw new Error(
+          `Anthropic API request timed out after ${this.config.timeout || 60000}ms`,
+        );
       }
       throw new Error(
         `Failed to generate completion with Anthropic: ${error instanceof Error ? error.message : String(error)}`,
@@ -215,7 +230,10 @@ export class AnthropicProvider extends BaseProvider {
 
     try {
       const controller = new AbortController();
-      const timeout = setTimeout(() => controller.abort(), this.config.timeout || 60000);
+      const timeout = setTimeout(
+        () => controller.abort(),
+        this.config.timeout || 60000,
+      );
 
       const response = await fetch(AnthropicProvider.API_URL, {
         method: "POST",
@@ -232,7 +250,9 @@ export class AnthropicProvider extends BaseProvider {
 
       if (!response.ok) {
         const errorText = await response.text();
-        throw new Error(`Anthropic API error: ${response.status} - ${errorText}`);
+        throw new Error(
+          `Anthropic API error: ${response.status} - ${errorText}`,
+        );
       }
 
       const reader = response.body?.getReader();
@@ -267,7 +287,11 @@ export class AnthropicProvider extends BaseProvider {
                 try {
                   const jsonStr = dataLine.slice(6);
                   const data = JSON.parse(jsonStr, (key, value) => {
-                    if (key === '__proto__' || key === 'constructor' || key === 'prototype') {
+                    if (
+                      key === "__proto__" ||
+                      key === "constructor" ||
+                      key === "prototype"
+                    ) {
                       return undefined;
                     }
                     return value;
@@ -285,7 +309,9 @@ export class AnthropicProvider extends BaseProvider {
                     usage = {
                       prompt_tokens: data.usage.input_tokens || 0,
                       completion_tokens: data.usage.output_tokens || 0,
-                      total_tokens: (data.usage.input_tokens || 0) + (data.usage.output_tokens || 0),
+                      total_tokens:
+                        (data.usage.input_tokens || 0) +
+                        (data.usage.output_tokens || 0),
                     };
                   } else if (eventType === "message_stop") {
                     // Stream completed
@@ -303,7 +329,11 @@ export class AnthropicProvider extends BaseProvider {
               const jsonStr = line.slice(6);
               if (jsonStr !== "[DONE]") {
                 const data = JSON.parse(jsonStr, (key, value) => {
-                  if (key === '__proto__' || key === 'constructor' || key === 'prototype') {
+                  if (
+                    key === "__proto__" ||
+                    key === "constructor" ||
+                    key === "prototype"
+                  ) {
                     return undefined;
                   }
                   return value;

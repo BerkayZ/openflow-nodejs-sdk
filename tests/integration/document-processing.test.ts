@@ -69,7 +69,7 @@ describe("Document Processing Integration Tests", () => {
               dpi: 200,
               image_format: "png",
             },
-            document: "{{pdf_path}}",
+            document: "{{@pdf_path}}",
           },
           {
             id: "save_extracted_data",
@@ -139,7 +139,7 @@ describe("Document Processing Integration Tests", () => {
               dpi: 150,
               image_format: "png",
             },
-            document: "{{pdf_path}}",
+            document: "{{@pdf_path}}",
           },
           {
             id: "analyze_pages",
@@ -259,7 +259,7 @@ describe("Document Processing Integration Tests", () => {
                 type: "image",
                 role: "user",
                 text: "Analyze this image and describe what you see. Include details about objects, text, people, setting, and any other relevant information.",
-                image_path: "{{image_path}}",
+                image_path: "{{@image_path}}",
                 detail: "high",
               },
             ],
@@ -339,7 +339,7 @@ describe("Document Processing Integration Tests", () => {
               each_key: "current_image_path",
             },
             input: {
-              items: "{{image_paths}}",
+              items: "{{@image_paths}}",
             },
             each_nodes: [
               {
@@ -548,7 +548,7 @@ describe("Document Processing Integration Tests", () => {
               dpi: 150,
               image_format: "png",
             },
-            document: "{{pdf_path}}",
+            document: "{{@pdf_path}}",
           },
           {
             id: "summarize_document",

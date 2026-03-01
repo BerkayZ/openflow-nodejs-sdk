@@ -78,7 +78,9 @@ export abstract class BaseNode {
           return Array.isArray(value)
             ? value
                 .map((item) =>
-                  item !== null && item !== undefined && typeof item === "object"
+                  item !== null &&
+                  item !== undefined &&
+                  typeof item === "object"
                     ? JSON.stringify(item)
                     : String(item),
                 )

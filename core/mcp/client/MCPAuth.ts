@@ -9,7 +9,12 @@
 import { MCPAuthConfig } from "../types";
 
 // Restricted headers that should not be overwritten by custom headers
-const RESTRICTED_HEADERS = ['authorization', 'x-api-key', 'cookie', 'set-cookie'];
+const RESTRICTED_HEADERS = [
+  "authorization",
+  "x-api-key",
+  "cookie",
+  "set-cookie",
+];
 
 export class MCPAuth {
   private config: MCPAuthConfig;

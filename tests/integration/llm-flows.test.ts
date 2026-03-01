@@ -77,7 +77,7 @@ describe("LLM Integration Tests", () => {
               {
                 type: "text",
                 role: "user",
-                text: "{{user_prompt}}",
+                text: "{{@user_prompt}}",
               },
             ],
             output: {
@@ -212,7 +212,7 @@ describe("LLM Integration Tests", () => {
               {
                 type: "text",
                 role: "user",
-                text: "Write a {{style}} piece about {{topic}} in exactly {{length}} sentences.",
+                text: "Write a {{@style}} piece about {{@topic}} in exactly {{@length}} sentences.",
               },
             ],
             output: {

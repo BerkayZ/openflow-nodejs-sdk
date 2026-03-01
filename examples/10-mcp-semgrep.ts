@@ -51,7 +51,7 @@ async function runMCPSemgrepFlow() {
           {
             type: "text",
             role: "user",
-            text: "Generate code for: {{@code_request}}. Please provide complete, functional code that demonstrates the requested functionality."
+            text: "Generate code for: {{@code_request}}. Please provide complete, functional code that demonstrates the requested functionality.",
           },
         ],
         output: {

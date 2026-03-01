@@ -7,7 +7,12 @@ export interface ExecutionResult {
 }
 
 export interface StreamExecutionChunk {
-  type: "node_start" | "node_complete" | "stream_chunk" | "flow_complete" | "error";
+  type:
+    | "node_start"
+    | "node_complete"
+    | "stream_chunk"
+    | "flow_complete"
+    | "error";
   nodeId?: string;
   content?: string;
   isComplete?: boolean;

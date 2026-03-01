@@ -90,7 +90,7 @@ describe("MCP Integration Tests", () => {
               {
                 type: "text",
                 role: "user",
-                text: "Research the topic: {{research_topic}}. Provide a brief summary.",
+                text: "Research the topic: {{@research_topic}}. Provide a brief summary.",
               },
             ],
             output: {
@@ -176,7 +176,7 @@ describe("MCP Integration Tests", () => {
               {
                 type: "text",
                 role: "user",
-                text: "Analyze this code for security issues: {{code_to_analyze}}",
+                text: "Analyze this code for security issues: {{@code_to_analyze}}",
               },
             ],
             output: {
@@ -271,7 +271,7 @@ describe("MCP Integration Tests", () => {
               {
                 type: "text",
                 role: "user",
-                text: "Get current price data for {{crypto_symbol}} and provide a brief analysis.",
+                text: "Get current price data for {{@crypto_symbol}} and provide a brief analysis.",
               },
             ],
             output: {
@@ -491,7 +491,7 @@ describe("MCP Integration Tests", () => {
               {
                 type: "text",
                 role: "user",
-                text: "Research: {{research_query}}",
+                text: "Research: {{@research_query}}",
               },
             ],
             output: {

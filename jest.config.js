@@ -8,10 +8,7 @@ module.exports = {
   rootDir: ".",
 
   // Test file patterns (updated for cross-platform compatibility)
-  testMatch: [
-    "<rootDir>/tests/**/*.test.ts",
-    "**/tests/**/*.test.ts"
-  ],
+  testMatch: ["<rootDir>/tests/**/*.test.ts", "**/tests/**/*.test.ts"],
 
   // Module file extensions
   moduleFileExtensions: ["ts", "js", "json", "node"],

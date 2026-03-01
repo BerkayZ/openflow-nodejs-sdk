@@ -191,7 +191,11 @@ export class MCPConnectionManager {
         if (eventType === "message") {
           try {
             return JSON.parse(data, (key, value) => {
-              if (key === '__proto__' || key === 'constructor' || key === 'prototype') {
+              if (
+                key === "__proto__" ||
+                key === "constructor" ||
+                key === "prototype"
+              ) {
                 return undefined;
               }
               return value;

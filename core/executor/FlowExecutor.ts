@@ -130,7 +130,12 @@ export class FlowExecutor {
     }
 
     const flow = validation.flow!;
-    const registry = new ExecutionRegistry(flowId, flow, this.config.tempDir, inputVariables);
+    const registry = new ExecutionRegistry(
+      flowId,
+      flow,
+      this.config.tempDir,
+      inputVariables,
+    );
 
     try {
       // Execute nodes in order with streaming
@@ -210,7 +215,6 @@ export class FlowExecutor {
         outputs,
         executionTime: Date.now() - startTime,
       };
-
     } catch (error) {
       yield {
         type: "error",
@@ -267,7 +271,11 @@ export class FlowExecutor {
       }
 
       // Start as many flows as we have slots for
-      for (let i = 0; i < availableSlots && this.executionQueue.length > 0; i++) {
+      for (
+        let i = 0;
+        i < availableSlots && this.executionQueue.length > 0;
+        i++
+      ) {
         const queuedFlow = this.executionQueue.shift()!;
         this.executeFlowInternal(queuedFlow);
       }

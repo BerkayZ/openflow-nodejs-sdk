@@ -6,7 +6,12 @@
  * If not included, see <https://www.gnu.org/licenses/gpl-3.0.en.html>
  */
 
-import { BaseProvider, LLMMessage, LLMResponse, StreamChunk } from "./BaseProvider";
+import {
+  BaseProvider,
+  LLMMessage,
+  LLMResponse,
+  StreamChunk,
+} from "./BaseProvider";
 import { ProviderConfig, OutputSchema } from "../../../types";
 import { PromptBuilder } from "../PromptBuilder";
 
@@ -79,7 +84,10 @@ export class GrokProvider extends BaseProvider {
 
     try {
       const controller = new AbortController();
-      const timeout = setTimeout(() => controller.abort(), this.config.timeout || 60000);
+      const timeout = setTimeout(
+        () => controller.abort(),
+        this.config.timeout || 60000,
+      );
 
       const response = await fetch(GrokProvider.API_URL, {
         method: "POST",
@@ -117,8 +125,10 @@ export class GrokProvider extends BaseProvider {
           : undefined,
       };
     } catch (error) {
-      if (error instanceof Error && error.name === 'AbortError') {
-        throw new Error(`Grok API request timed out after ${this.config.timeout || 60000}ms`);
+      if (error instanceof Error && error.name === "AbortError") {
+        throw new Error(
+          `Grok API request timed out after ${this.config.timeout || 60000}ms`,
+        );
       }
       throw new Error(
         `Failed to generate completion with Grok: ${error instanceof Error ? error.message : String(error)}`,
@@ -168,7 +178,10 @@ export class GrokProvider extends BaseProvider {
 
     try {
       const controller = new AbortController();
-      const timeout = setTimeout(() => controller.abort(), this.config.timeout || 60000);
+      const timeout = setTimeout(
+        () => controller.abort(),
+        this.config.timeout || 60000,
+      );
 
       const response = await fetch(GrokProvider.API_URL, {
         method: "POST",
@@ -212,7 +225,11 @@ export class GrokProvider extends BaseProvider {
             try {
               const jsonStr = line.slice(6);
               const data = JSON.parse(jsonStr, (key, value) => {
-                if (key === '__proto__' || key === 'constructor' || key === 'prototype') {
+                if (
+                  key === "__proto__" ||
+                  key === "constructor" ||
+                  key === "prototype"
+                ) {
                   return undefined;
                 }
                 return value;

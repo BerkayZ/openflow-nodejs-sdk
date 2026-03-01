@@ -14,7 +14,10 @@ import { MCPProvider, MCPConfig } from "../../mcp";
 
 // Interface for providers with streaming support
 interface StreamingProvider {
-  executeStream?: (node: FlowNode, context: NodeExecutionContext) => AsyncGenerator<any>;
+  executeStream?: (
+    node: FlowNode,
+    context: NodeExecutionContext,
+  ) => AsyncGenerator<any>;
 }
 
 // Interface for provider config with retry settings
@@ -362,7 +365,7 @@ export class LLMNodeExecutor extends BaseNode {
     // Helper function for retry logic
     const executeWithRetry = async (
       fn: () => Promise<any>,
-      retryConfig?: { max_attempts?: number; delay_ms?: number }
+      retryConfig?: { max_attempts?: number; delay_ms?: number },
     ): Promise<any> => {
       const maxAttempts = retryConfig?.max_attempts || 1;
       const delayMs = retryConfig?.delay_ms || 1000;
@@ -380,15 +383,17 @@ export class LLMNodeExecutor extends BaseNode {
           this.log(
             context,
             "warn",
-            `Attempt ${attempt} failed: ${error instanceof Error ? error.message : 'Unknown error'}. Retrying in ${delayMs * attempt}ms...`
+            `Attempt ${attempt} failed: ${error instanceof Error ? error.message : "Unknown error"}. Retrying in ${delayMs * attempt}ms...`,
           );
 
           // Exponential backoff
-          await new Promise(resolve => setTimeout(resolve, delayMs * attempt));
+          await new Promise((resolve) =>
+            setTimeout(resolve, delayMs * attempt),
+          );
         }
       }
 
-      throw new Error('Retry logic failed unexpectedly');
+      throw new Error("Retry logic failed unexpectedly");
     };
 
     // Get retry configuration from node config
@@ -398,7 +403,7 @@ export class LLMNodeExecutor extends BaseNode {
     if (!this.mcpProvider || !this.mcpProvider.isInitialized()) {
       return await executeWithRetry(
         () => provider.generateCompletion(messages, outputSchema),
-        retryConfig
+        retryConfig,
       );
     }
 
@@ -410,7 +415,7 @@ export class LLMNodeExecutor extends BaseNode {
     while (iteration < maxIterations) {
       const response = await executeWithRetry(
         () => provider.generateCompletion(currentMessages, outputSchema),
-        retryConfig
+        retryConfig,
       );
       totalTokens += response.usage?.total_tokens || 0;
 
@@ -548,7 +553,11 @@ export class LLMNodeExecutor extends BaseNode {
       }
 
       return JSON.parse(jsonStr, (key, value) => {
-        if (key === '__proto__' || key === 'constructor' || key === 'prototype') {
+        if (
+          key === "__proto__" ||
+          key === "constructor" ||
+          key === "prototype"
+        ) {
           return undefined;
         }
         return value;

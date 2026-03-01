@@ -118,7 +118,7 @@ export class ForEachNodeExecutor extends BaseNode {
 
         for (let i = 0; i < settledResults.length; i++) {
           const settledResult = settledResults[i];
-          if (settledResult.status === 'fulfilled') {
+          if (settledResult.status === "fulfilled") {
             results.push(settledResult.value);
           } else {
             errors.push(new Error(`Item ${i} failed: ${settledResult.reason}`));
@@ -127,14 +127,17 @@ export class ForEachNodeExecutor extends BaseNode {
               item: inputList[i],
               index: i,
               results: [],
-              error: settledResult.reason
+              error: settledResult.reason,
             });
           }
         }
 
         // If any errors occurred, throw an aggregate error
         if (errors.length > 0) {
-          throw new AggregateError(errors, `${errors.length} of ${settledResults.length} items failed in parallel execution`);
+          throw new AggregateError(
+            errors,
+            `${errors.length} of ${settledResults.length} items failed in parallel execution`,
+          );
         }
       } else {
         // Sequential execution with delay support

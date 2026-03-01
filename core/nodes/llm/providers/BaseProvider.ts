@@ -85,7 +85,11 @@ export abstract class BaseProvider {
       }
 
       return JSON.parse(jsonStr, (key, value) => {
-        if (key === '__proto__' || key === 'constructor' || key === 'prototype') {
+        if (
+          key === "__proto__" ||
+          key === "constructor" ||
+          key === "prototype"
+        ) {
           return undefined;
         }
         return value;

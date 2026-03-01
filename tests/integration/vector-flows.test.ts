@@ -65,7 +65,7 @@ describe("Vector Database Integration Tests", () => {
               model: "text-embedding-ada-002",
             },
             input: {
-              text: "{{input_text}}",
+              text: "{{@input_text}}",
             },
           },
           {
@@ -114,7 +114,7 @@ describe("Vector Database Integration Tests", () => {
               model: "text-embedding-ada-002",
             },
             input: {
-              texts: "{{text_list}}",
+              texts: "{{@text_list}}",
             },
           },
           {
@@ -162,7 +162,7 @@ describe("Vector Database Integration Tests", () => {
               model: "text-embedding-ada-002",
             },
             input: {
-              items: "{{items_with_metadata}}",
+              items: "{{@items_with_metadata}}",
             },
           },
           {
@@ -230,7 +230,7 @@ describe("Vector Database Integration Tests", () => {
               items: [
                 {
                   id: "test-vector-1",
-                  text: "{{text_to_embed}}",
+                  text: "{{@text_to_embed}}",
                   metadata: { test: true, timestamp: new Date().toISOString() },
                 },
               ],
@@ -288,7 +288,7 @@ describe("Vector Database Integration Tests", () => {
             type: NodeType.TEXT_EMBEDDING,
             name: "Embed Search Query",
             config: { provider: "openai", model: "text-embedding-ada-002" },
-            input: { text: "{{search_query}}" },
+            input: { text: "{{@search_query}}" },
           },
           {
             id: "search_vectors",
@@ -345,7 +345,7 @@ describe("Vector Database Integration Tests", () => {
               each_key: "current_doc",
             },
             input: {
-              items: "{{documents}}",
+              items: "{{@documents}}",
             },
             each_nodes: [
               {

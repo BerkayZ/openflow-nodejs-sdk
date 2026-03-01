@@ -16,7 +16,13 @@ export interface ConversationMessage {
 }
 
 export interface ConversationMemoryConfig {
-  operation: "append" | "load" | "clear" | "slice" | "serialize" | "deserialize";
+  operation:
+    | "append"
+    | "load"
+    | "clear"
+    | "slice"
+    | "serialize"
+    | "deserialize";
   variable_id: string;
   max_messages?: number;
   slice_start?: number;
@@ -63,7 +69,7 @@ export class ConversationMemoryNode extends BaseNode {
     messages: ConversationMessage[],
     input: any,
     config: ConversationMemoryConfig,
-    context: NodeExecutionContext
+    context: NodeExecutionContext,
   ): any {
     // Resolve input variables
     const resolvedInput = this.resolveObjectVariables(input, context.registry);
@@ -88,7 +94,7 @@ export class ConversationMemoryNode extends BaseNode {
     context.registry.setVariable(config.variable_id, messages);
 
     context.logger.debug(
-      `Appended message to conversation. Total messages: ${messages.length}`
+      `Appended message to conversation. Total messages: ${messages.length}`,
     );
 
     return {
@@ -100,7 +106,7 @@ export class ConversationMemoryNode extends BaseNode {
   private loadMessages(
     input: any,
     config: ConversationMemoryConfig,
-    context: NodeExecutionContext
+    context: NodeExecutionContext,
   ): any {
     // Resolve input variables
     const resolvedInput = this.resolveObjectVariables(input, context.registry);
@@ -116,7 +122,9 @@ export class ConversationMemoryNode extends BaseNode {
     // Set the variable
     context.registry.setVariable(config.variable_id, messages);
 
-    context.logger.debug(`Loaded ${messages.length} messages into conversation`);
+    context.logger.debug(
+      `Loaded ${messages.length} messages into conversation`,
+    );
 
     return {
       message_count: messages.length,
@@ -126,7 +134,7 @@ export class ConversationMemoryNode extends BaseNode {
 
   private clearMessages(
     config: ConversationMemoryConfig,
-    context: NodeExecutionContext
+    context: NodeExecutionContext,
   ): any {
     // Clear the messages array
     context.registry.setVariable(config.variable_id, []);
@@ -142,7 +150,7 @@ export class ConversationMemoryNode extends BaseNode {
   private sliceMessages(
     messages: ConversationMessage[],
     config: ConversationMemoryConfig,
-    context: NodeExecutionContext
+    context: NodeExecutionContext,
   ): any {
     const start = config.slice_start || 0;
     const end = config.slice_end || messages.length;
@@ -154,7 +162,7 @@ export class ConversationMemoryNode extends BaseNode {
     context.registry.setVariable(config.variable_id, slicedMessages);
 
     context.logger.debug(
-      `Sliced messages from ${start} to ${end}. New count: ${slicedMessages.length}`
+      `Sliced messages from ${start} to ${end}. New count: ${slicedMessages.length}`,
     );
 
     return {
@@ -165,7 +173,7 @@ export class ConversationMemoryNode extends BaseNode {
 
   private serializeMessages(
     messages: ConversationMessage[],
-    context: NodeExecutionContext
+    context: NodeExecutionContext,
   ): any {
     // Serialize messages to JSON string
     const serialized = JSON.stringify(messages);
@@ -181,7 +189,7 @@ export class ConversationMemoryNode extends BaseNode {
   private deserializeMessages(
     input: any,
     config: ConversationMemoryConfig,
-    context: NodeExecutionContext
+    context: NodeExecutionContext,
   ): any {
     // Resolve input variables
     const resolvedInput = this.resolveObjectVariables(input, context.registry);
@@ -192,7 +200,11 @@ export class ConversationMemoryNode extends BaseNode {
 
     try {
       messages = JSON.parse(serialized, (key, value) => {
-        if (key === '__proto__' || key === 'constructor' || key === 'prototype') {
+        if (
+          key === "__proto__" ||
+          key === "constructor" ||
+          key === "prototype"
+        ) {
           return undefined;
         }
         return value;
