@@ -44,6 +44,10 @@ export interface ProviderConfig {
   temperature?: number;
   mcp_servers?: MCPServerConfig[];
   tools?: MCPToolsConfig;
+  retry?: {
+    max_attempts: number;
+    delay_ms: number;
+  };
 }
 
 export { VectorDBProviderConfig } from "./config";

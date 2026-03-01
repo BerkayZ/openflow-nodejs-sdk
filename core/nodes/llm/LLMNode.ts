@@ -341,8 +341,46 @@ export class LLMNodeExecutor extends BaseNode {
     outputSchema: any,
     context: NodeExecutionContext,
   ): Promise<any> {
+    // Helper function for retry logic
+    const executeWithRetry = async (
+      fn: () => Promise<any>,
+      retryConfig?: { max_attempts?: number; delay_ms?: number }
+    ): Promise<any> => {
+      const maxAttempts = retryConfig?.max_attempts || 1;
+      const delayMs = retryConfig?.delay_ms || 1000;
+
+      for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+        try {
+          return await fn();
+        } catch (error) {
+          const isLastAttempt = attempt === maxAttempts;
+
+          if (isLastAttempt) {
+            throw error;
+          }
+
+          this.log(
+            context,
+            "warn",
+            `Attempt ${attempt} failed: ${error instanceof Error ? error.message : 'Unknown error'}. Retrying in ${delayMs * attempt}ms...`
+          );
+
+          // Exponential backoff
+          await new Promise(resolve => setTimeout(resolve, delayMs * attempt));
+        }
+      }
+
+      throw new Error('Retry logic failed unexpectedly');
+    };
+
+    // Get retry configuration from node config
+    const retryConfig = (provider.config as any)?.retry;
+
     if (!this.mcpProvider || !this.mcpProvider.isInitialized()) {
-      return await provider.generateCompletion(messages, outputSchema);
+      return await executeWithRetry(
+        () => provider.generateCompletion(messages, outputSchema),
+        retryConfig
+      );
     }
 
     const maxIterations = 5;
@@ -351,9 +389,9 @@ export class LLMNodeExecutor extends BaseNode {
     let totalTokens = 0;
 
     while (iteration < maxIterations) {
-      const response = await provider.generateCompletion(
-        currentMessages,
-        outputSchema,
+      const response = await executeWithRetry(
+        () => provider.generateCompletion(currentMessages, outputSchema),
+        retryConfig
       );
       totalTokens += response.usage?.total_tokens || 0;
 
