@@ -115,7 +115,8 @@ export class PineconeProvider {
         namespace: options.namespace,
       };
     } catch (error) {
-      console.error(`Pinecone upsert failed:`, error);
+      // Log error internally - could be replaced with a proper logger if available
+      // For now, just handle the error without console output
 
       if (error instanceof Error) {
         if (error.message.includes("dimension")) {

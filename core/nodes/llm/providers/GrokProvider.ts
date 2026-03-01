@@ -214,8 +214,8 @@ export class GrokProvider extends BaseProvider {
                 };
               }
             } catch (error) {
-              // Skip invalid JSON lines
-              console.error("Failed to parse SSE chunk:", error);
+              // Skip invalid JSON lines - this is expected for some SSE events
+              // Silently ignore parsing errors
             }
           }
         }
