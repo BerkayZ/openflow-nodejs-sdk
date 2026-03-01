@@ -9,6 +9,7 @@
 import { BaseProvider } from "./BaseProvider";
 import { GrokProvider } from "./GrokProvider";
 import { OpenAIProvider } from "./OpenAIProvider";
+import { AnthropicProvider } from "./AnthropicProvider";
 import { ProviderConfig } from "../../../types";
 
 export class ProviderFactory {
@@ -18,12 +19,14 @@ export class ProviderFactory {
         return new GrokProvider(config, apiKey);
       case "openai":
         return new OpenAIProvider(config, apiKey);
+      case "anthropic":
+        return new AnthropicProvider(config, apiKey);
       default:
         throw new Error(`Unsupported provider: ${config.provider}`);
     }
   }
 
   static getSupportedProviders(): string[] {
-    return ["grok", "openai"];
+    return ["grok", "openai", "anthropic"];
   }
 }
