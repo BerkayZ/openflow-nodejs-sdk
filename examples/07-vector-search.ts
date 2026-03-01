@@ -39,7 +39,7 @@ async function runVectorSearch() {
         type: "TEXT_EMBEDDING",
         name: "Embed Search Query",
         config: { provider: "openai", model: "text-embedding-ada-002" },
-        input: { text: "{{search_query}}" },
+        input: { text: "{{@search_query}}" },
       },
       {
         id: "search_vectors",

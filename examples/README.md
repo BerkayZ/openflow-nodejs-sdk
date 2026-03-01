@@ -139,7 +139,7 @@ The SDK now supports comprehensive variable manipulation operations for professi
 
 - **Nested field access**: Use dot notation (`metadata.title`, `results[0].score`)
 - **Condition operators**: `equals`, `not_equals`, `contains`, `greater_than`, `less_than`
-- **Variable resolution**: All config fields support `{{variable}}` syntax
+- **Variable resolution**: All config fields support `{{@variable}}` syntax for flow variables and `{{node.field}}` for node outputs
 - **Type safety**: Comprehensive error handling for invalid operations
 - **Output stringification control**: Use `stringify_output: false` to preserve objects as objects instead of converting to JSON strings
 

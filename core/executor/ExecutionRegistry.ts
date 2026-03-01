@@ -157,21 +157,26 @@ export class ExecutionRegistry {
 
   /**
    * Resolve variable expression (used by VariableResolver)
+   * New syntax:
+   * - @variable_id -> flow variable reference
+   * - node_id.field -> node output field reference
+   * - node_id -> entire node output object
    */
   resolveExpression(expression: string): any {
+    // Check if it's a variable reference with @ prefix
+    if (expression.startsWith("@")) {
+      const variableId = expression.substring(1);
+      return this.getVariable(variableId);
+    }
+
+    // Otherwise, it's a node output reference
     const parts = expression.split(".");
 
     if (parts.length === 1) {
-      // Could be either a node reference ({{node_id}}) or variable reference ({{variable_id}})
-      // Check for node output first
-      if (this.hasNodeOutput(parts[0])) {
-        return this.getNodeOutput(parts[0]);
-      } else {
-        // Fall back to variable reference
-        return this.getVariable(parts[0]);
-      }
+      // Direct node output reference: {{node_id}}
+      return this.getNodeOutput(parts[0]);
     } else {
-      // Node output reference: {{node_id.property}}
+      // Node output field reference: {{node_id.property}}
       const nodeId = parts[0];
       const nodeOutput = this.getNodeOutput(nodeId);
 

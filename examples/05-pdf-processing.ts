@@ -36,7 +36,7 @@ async function runPDFProcessing() {
         id: "pdf_splitter",
         type: "DOCUMENT_SPLITTER",
         name: "Split PDF",
-        document: "{{pdf_file}}",
+        document: "{{@pdf_file}}",
         config: {
           image_quality: "high",
           dpi: 200,
@@ -63,7 +63,7 @@ async function runPDFProcessing() {
                 type: "image",
                 role: "user",
                 text: "Analyze this PDF page and describe its content:",
-                image_data: "{{current.fileId}}",
+                image_data: "{{@current.fileId}}",
               },
             ],
             output: {

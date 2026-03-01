@@ -44,7 +44,7 @@ class RAGChatBot {
           type: "TEXT_EMBEDDING",
           name: "Generate Embeddings",
           config: { provider: "openai", model: "text-embedding-ada-002" },
-          input: { items: "{{documents}}" },
+          input: { items: "{{@documents}}" },
         },
         {
           id: "store_embeddings",
@@ -95,7 +95,7 @@ class RAGChatBot {
           type: "TEXT_EMBEDDING",
           name: "Embed Search Query",
           config: { provider: "openai", model: "text-embedding-ada-002" },
-          input: { text: "{{search_query}}" },
+          input: { text: "{{@search_query}}" },
         },
         {
           id: "search_vectors",
@@ -172,12 +172,12 @@ class RAGChatBot {
               text: `You are a helpful AI assistant. Answer the user's question based only on the provided context. If the context doesn't contain enough information to answer the question, say so. Be concise and accurate.
 
 Context:
-{{context}}`,
+{{@context}}`,
             },
             {
               type: "text",
               role: "user",
-              text: "{{question}}",
+              text: "{{@question}}",
             },
           ],
           output: {

@@ -36,7 +36,7 @@ async function runBasicLLM() {
           {
             type: "text",
             role: "user",
-            text: "{{user_prompt}}",
+            text: "{{@user_prompt}}",
           },
         ],
         output: {

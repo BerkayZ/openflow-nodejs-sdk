@@ -39,7 +39,7 @@ async function runEmbedAndStore() {
         type: "TEXT_EMBEDDING",
         name: "Generate Embeddings",
         config: { provider: "openai", model: "text-embedding-ada-002" },
-        input: { items: "{{documents}}" },
+        input: { items: "{{@documents}}" },
       },
       {
         id: "store_embeddings",

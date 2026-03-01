@@ -27,7 +27,7 @@ async function runForEachLoop() {
           delay_between: 50,
           each_key: "current",
         },
-        input: { items: "{{numbers}}" },
+        input: { items: "{{@numbers}}" },
         each_nodes: [
           {
             id: "format_number",
@@ -37,7 +37,7 @@ async function runForEachLoop() {
               type: "update",
               variable_id: "formatted_number",
             },
-            value: "Number: {{current}} (squared: {{current}}²)",
+            value: "Number: {{@current}} (squared: {{@current}}²)",
           },
           {
             id: "add_to_result",

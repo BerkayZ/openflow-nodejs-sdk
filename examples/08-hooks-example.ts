@@ -36,7 +36,7 @@ async function runHooksExample() {
         type: "UPDATE_VARIABLE",
         name: "Process Input",
         config: { type: "update", variable_id: "processed_result" },
-        value: "Processed: {{user_input}}",
+        value: "Processed: {{@user_input}}",
       },
       {
         id: "llm_analysis",
@@ -47,7 +47,7 @@ async function runHooksExample() {
           {
             type: "text",
             role: "user",
-            text: "Analyze this text: {{processed_result}}",
+            text: "Analyze this text: {{@processed_result}}",
           },
         ],
         output: {

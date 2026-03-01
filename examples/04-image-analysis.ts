@@ -44,7 +44,7 @@ async function runImageAnalysis() {
             type: "image",
             role: "user",
             text: "Analyze this image and describe what you see:",
-            image_data: "{{image_file}}",
+            image_data: "{{@image_file}}",
           },
         ],
         output: {

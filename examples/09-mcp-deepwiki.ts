@@ -62,7 +62,7 @@ async function runMCPLLMFlow() {
           {
             type: "text",
             role: "user",
-            text: "Research the topic: {{research_topic}}. Please search for detailed information and provide a comprehensive summary with key points and sources.",
+            text: "Research the topic: {{@research_topic}}. Please search for detailed information and provide a comprehensive summary with key points and sources.",
           },
         ],
         output: {

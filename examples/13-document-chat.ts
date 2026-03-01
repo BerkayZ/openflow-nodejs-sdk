@@ -58,7 +58,7 @@ class RAGDocumentBot {
           id: "pdf_splitter",
           type: NodeType.DOCUMENT_SPLITTER,
           name: "Split PDF",
-          document: "{{pdf_file}}",
+          document: "{{@pdf_file}}",
           config: {
             image_quality: "high",
             dpi: 200,
@@ -115,12 +115,12 @@ class RAGDocumentBot {
               },
               input: {
                 embedding: {
-                  id: "{{document_id}}_page_{{current.pageNumber}}",
+                  id: "{{@document_id}}_page_{{current.pageNumber}}",
                   values: "{{embed_page.embedding.values}}",
                   metadata: {
                     text: "{{analyze_page.explanation}}",
                     pageNumber: "{{current.pageNumber}}",
-                    documentId: "{{document_id}}",
+                    documentId: "{{@document_id}}",
                     source: "pdf_page",
                     type: "document_chunk",
                     extractedAt: new Date().toISOString(),
@@ -139,7 +139,7 @@ class RAGDocumentBot {
               value: {
                 text: "{{analyze_page.explanation}}",
                 pageNumber: "{{current.pageNumber}}",
-                id: "{{document_id}}",
+                id: "{{@document_id}}",
                 source: "pdf_page",
                 type: "document_chunk",
                 extractedAt: new Date().toISOString(),
@@ -180,7 +180,7 @@ class RAGDocumentBot {
           type: NodeType.TEXT_EMBEDDING,
           name: "Embed Search Query",
           config: { provider: "openai", model: "text-embedding-ada-002" },
-          input: { text: "{{search_query}}" },
+          input: { text: "{{@search_query}}" },
         },
         {
           id: "search_vectors",
@@ -257,12 +257,12 @@ class RAGDocumentBot {
               role: "system",
               text: `You are a helpful AI assistant. Answer the user's question based only on the provided context. If the context doesn't contain enough information to answer the question, say so. Be concise and accurate.
                             Context:
-                            {{context}}`,
+                            {{@context}}`,
             },
             {
               type: "text",
               role: "user",
-              text: "{{question}}",
+              text: "{{@question}}",
             },
           ],
           output: {
