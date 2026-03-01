@@ -245,13 +245,6 @@ export interface ConditionNode extends BaseNode {
   branches: Record<string, ConditionBranch>;
 }
 
-// Embedding Node Types
-export interface EmbeddingItem {
-  id: string;
-  text: string;
-  metadata?: Record<string, any>;
-}
-
 export interface EmbeddingResult {
   id: string;
   text: string;

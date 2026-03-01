@@ -9,6 +9,7 @@
 import {
   FlowExecutorConfig,
   FlowDefinition,
+  FlowNode,
   ExecutionResult,
   StreamExecutionChunk,
   QueuedFlow,
@@ -43,7 +44,7 @@ export class FlowExecutor {
    * Execute a flow and return promise with result
    */
   async executeFlow(
-    flowJson: any,
+    flowJson: FlowDefinition,
     inputVariables?: Record<string, any>,
     hooks?: FlowHooks,
   ): Promise<ExecutionResult> {
@@ -89,7 +90,7 @@ export class FlowExecutor {
    * Returns an async generator that yields execution chunks
    */
   async *executeFlowStream(
-    flowJson: any,
+    flowJson: FlowDefinition,
     inputVariables?: Record<string, any>,
     hooks?: FlowHooks,
   ): AsyncGenerator<StreamExecutionChunk, void, unknown> {
@@ -127,7 +128,7 @@ export class FlowExecutor {
       const executionOrder = this.getExecutionOrder(flow);
 
       for (const nodeId of executionOrder) {
-        const node = flow.nodes.find((n: any) => n.id === nodeId);
+        const node = flow.nodes.find((n) => n.id === nodeId);
         if (!node) continue;
 
         // Notify node start
@@ -445,7 +446,7 @@ export class FlowExecutor {
    * Execute a single node using NodeFactory
    */
   private async executeNode(
-    node: any,
+    node: FlowNode,
     registry: ExecutionRegistry,
   ): Promise<any> {
     try {

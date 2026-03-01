@@ -96,15 +96,7 @@ export class PineconeProvider {
         },
       );
 
-      console.log(
-        `Upserting ${pineconeVectors.length} vectors to index '${indexName}'${options.namespace ? ` in namespace '${options.namespace}'` : ""}`,
-      );
-      console.log(`Sample vector:`, {
-        id: pineconeVectors[0]?.id,
-        dimensions: pineconeVectors[0]?.values?.length,
-        hasMetadata: !!pineconeVectors[0]?.metadata,
-        hasSparseValues: !!pineconeVectors[0]?.sparseValues,
-      });
+      // Upserting vectors to index
 
       // Perform the upsert using the correct namespace API
       let response;
@@ -116,7 +108,7 @@ export class PineconeProvider {
         response = await index.upsert(pineconeVectors);
       }
 
-      console.log(`Upsert successful:`, response);
+      // Upsert completed
 
       return {
         upserted_count: pineconeVectors.length,
@@ -295,7 +287,7 @@ export class PineconeProvider {
         },
       });
 
-      console.log(`Index '${options.name}' created successfully`);
+      // Index created successfully
     } catch (error) {
       throw new Error(
         `Failed to create index: ${error instanceof Error ? error.message : "Unknown error"}`,
@@ -307,7 +299,7 @@ export class PineconeProvider {
   async deleteIndex(indexName: string): Promise<void> {
     try {
       await this.client.deleteIndex(indexName);
-      console.log(`Index '${indexName}' deleted successfully`);
+      // Index deleted successfully
     } catch (error) {
       throw new Error(
         `Failed to delete index: ${error instanceof Error ? error.message : "Unknown error"}`,

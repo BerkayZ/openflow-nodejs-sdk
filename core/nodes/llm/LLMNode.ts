@@ -73,7 +73,7 @@ export class LLMNodeExecutor extends BaseNode {
     this.log(context, "debug", `Raw LLM response:`, response.content);
 
     // Parse and validate the response
-    const parsedOutput = this.parseProviderResponse(response.content);
+    const parsedOutput = this.parseJsonResponse(response.content);
     const validatedOutput = OutputFormatter.validateAndFormat(
       parsedOutput,
       llmNode.output,
@@ -469,17 +469,19 @@ export class LLMNodeExecutor extends BaseNode {
   }
 
   /**
-   * Parse provider response (handles JSON in various formats)
+   * Parse JSON response (handles JSON in various formats)
+   * Uses the same implementation as BaseProvider for consistency
    */
-  private parseProviderResponse(content: string): any {
+  private parseJsonResponse(content: string): any {
     try {
-      let jsonStr = content.trim();
+      const trimmed = content.trim();
+      let jsonStr = trimmed;
 
       // Handle markdown code blocks
-      if (jsonStr.startsWith("```json")) {
-        jsonStr = jsonStr.slice(7, -3).trim();
-      } else if (jsonStr.startsWith("```")) {
-        jsonStr = jsonStr.slice(3, -3).trim();
+      if (trimmed.startsWith("```json")) {
+        jsonStr = trimmed.slice(7, -3);
+      } else if (trimmed.startsWith("```")) {
+        jsonStr = trimmed.slice(3, -3);
       }
 
       // Handle cases where the response is wrapped in additional text
@@ -491,7 +493,7 @@ export class LLMNodeExecutor extends BaseNode {
       return JSON.parse(jsonStr);
     } catch (error) {
       throw new Error(
-        `Failed to parse LLM response as JSON: ${error instanceof Error ? error.message : String(error)}. Response: ${content}`,
+        `Failed to parse JSON response: ${error instanceof Error ? error.message : String(error)}`,
       );
     }
   }
