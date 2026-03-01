@@ -2,7 +2,7 @@
 
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 [![Development Status](https://img.shields.io/badge/Status-Under%20Development-yellow.svg)](https://github.com/berkayz/openflow-nodejs-sdk)
-![Stage: Pre-Alpha](https://img.shields.io/badge/Stage-Pre_Alpha-purple.svg)
+![Stage: Alpha](https://img.shields.io/badge/Stage-Alpha-orange.svg)
 
 > **⚠️ NOTICE: This package is currently under active development and is not fully complete. APIs may change without notice. Use at your own risk for production applications.**
 
@@ -26,19 +26,24 @@ All orchestrated through declarative JSON flows that are portable, inspectable, 
 ### ✅ Implemented Features
 
 - **Core Execution Engine**: Flow validation, execution, and variable resolution
-- **LLM Integration**: Grok and OpenAI with text and vision support
+- **LLM Integration**: Grok, OpenAI, and Anthropic Claude (claude-3-5-sonnet, claude-3-opus) with text and vision support
+- **Stream Support**: Real-time LLM response streaming with executeFlowStream
+- **Conversation Memory Node**: Stateful chat management with append/load/clear/slice operations
 - **Vector Database**: Pinecone integration (insert, search)
 - **Document Processing**: PDF to image conversion and analysis
 - **Text Embeddings**: OpenAI text-embedding models
-- **Control Flow**: FOR_EACH loops, conditional branching, variable updates
+- **Control Flow**: FOR_EACH loops with parallel execution support (config.parallel: true), conditional branching, variable updates
+- **Enhanced ConditionNode**: Extended operators (not_contains, starts_with, ends_with, regex)
+- **Retry Policy**: Configurable retry logic for LLM nodes (config.retry)
 - **Input Variables**: Runtime variable passing with type support
 - **MCP Integration**: Model Context Protocol support with real-time tool access
-- **Comprehensive Examples**: 12 working examples covering all features
+- **Security Hardening**: Prototype pollution protection, request timeouts, auth header validation
+- **Comprehensive Examples**: 15 working examples covering all features
 - **Execution Hooks**: Pre/post execution hooks for custom logic
 
 ### 🚧 In Development
 
-- **Additional LLM Providers**: AWS Bedrock, Anthropic, Gemini
+- **Additional LLM Providers**: AWS Bedrock, Gemini
 - **More Vector Databases**: Weaviate, Qdrant, Chroma
 - **Generative AI Nodes**: Image generation, audio processing, video generation
 - **Plugin System**: Custom node types and providers
@@ -46,7 +51,6 @@ All orchestrated through declarative JSON flows that are portable, inspectable, 
 
 ### 🔮 Planned Features
 
-- **Stream Support**: Real-time data processing and streaming nodes
 - **CLI Tools**: Flow execution and validation commands
 - **Web Interface**: Visual flow builder and monitoring
 - **Flow Marketplace**: Share and discover community flows
@@ -107,7 +111,7 @@ const flow = {
         {
           type: "text",
           role: "user",
-          text: "Generate a friendly greeting for {{user_name}}",
+          text: "Generate a friendly greeting for {{@user_name}}",
         },
       ],
       output: {
@@ -128,6 +132,24 @@ const result = await executor.executeFlow(flow, {
 console.log(result.outputs.greeting);
 ```
 
+### 🌊 Streaming Example
+
+```typescript
+// Stream real-time LLM responses
+const stream = executor.executeFlowStream(flow, {
+  user_name: "Alice",
+});
+
+for await (const chunk of stream) {
+  if (chunk.type === "node_output" && chunk.node_id === "greet") {
+    // Real-time streaming chunks from LLM
+    if (chunk.data.content) {
+      process.stdout.write(chunk.data.content);
+    }
+  }
+}
+```
+
 ## 📚 Examples
 
 The SDK includes examples in the `/examples` directory:
@@ -143,6 +165,8 @@ The SDK includes examples in the `/examples` directory:
 - **09-mcp-deepwiki.ts**: MCP integration with DeepWiki knowledge search
 - **10-mcp-semgrep.ts**: MCP integration with Semgrep security scanning
 - **11-mcp-coingecko.ts**: MCP integration with CoinGecko cryptocurrency data
+- **12-streaming.ts**: Real-time LLM response streaming with executeFlowStream
+- **13-conversation-memory.ts**: Stateful conversation management with ConversationMemoryNode
 
 Run any example:
 
@@ -228,6 +252,44 @@ const flow = {
           text: "You have access to external tools. Use them to enhance your responses.",
         },
       ],
+    },
+  ],
+};
+```
+
+### Conversation Memory
+
+The ConversationMemoryNode enables stateful conversation management:
+
+```typescript
+const flow = {
+  nodes: [
+    {
+      id: "memory",
+      type: "ConversationMemory",
+      name: "Manage Conversation History",
+      config: {
+        operation: "append", // append, load, clear, slice
+        messages: [
+          {
+            role: "user",
+            content: "{{@user_input}}",
+          },
+          {
+            role: "assistant",
+            content: "{{llm.response}}",
+          },
+        ],
+        // For slice operation
+        slice_start: 0,
+        slice_end: 10,
+      },
+      output: {
+        history: {
+          type: "array",
+          description: "Conversation history",
+        },
+      },
     },
   ],
 };

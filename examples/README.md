@@ -2,6 +2,13 @@
 
 This directory contains examples demonstrating various features of the OpenFlow SDK.
 
+## 🆕 New in Latest Version
+
+- **Streaming Support**: Real-time LLM response streaming with `executeFlowStream`
+- **Anthropic Provider**: Claude 3.5 Sonnet and Claude 3 Opus support
+- **ConversationMemoryNode**: Stateful conversation management
+- **Parallel ForEach**: Execute FOR_EACH loops in parallel with `config.parallel: true`
+
 ## Examples
 
 ### 01-basic-llm.ts
@@ -47,6 +54,14 @@ MCP integration with Semgrep security scanner - generates code and performs secu
 ### 11-mcp-coingecko.ts
 
 MCP integration with CoinGecko API for real-time cryptocurrency price data and market analysis.
+
+### 14-streaming.ts
+
+Real-time LLM response streaming with `executeFlowStream`. Demonstrates how to receive LLM responses as they are generated, providing a better user experience for long-form content generation.
+
+### 15-conversation-memory.ts
+
+Stateful conversation management using ConversationMemoryNode. Shows how to maintain conversation history across multiple turns, with operations to append, load, clear, and slice conversation history.
 
 ## Running Examples
 
