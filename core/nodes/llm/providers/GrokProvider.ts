@@ -10,6 +10,9 @@ import { BaseProvider, LLMMessage, LLMResponse, StreamChunk } from "./BaseProvid
 import { ProviderConfig, OutputSchema } from "../../../types";
 import { PromptBuilder } from "../PromptBuilder";
 
+// Constants
+const DEFAULT_MAX_TOKENS = 2000;
+
 export class GrokProvider extends BaseProvider {
   private static readonly API_URL = "https://api.x.ai/v1/chat/completions";
 
@@ -69,12 +72,15 @@ export class GrokProvider extends BaseProvider {
         ...messages.slice(0, -1),
         { role: "user", content: enhancedContent },
       ],
-      max_tokens: this.config.max_tokens || 2000,
+      max_tokens: this.config.max_tokens || DEFAULT_MAX_TOKENS,
       temperature: Math.min(this.config.temperature || 0.3, 0.3),
       stream: false,
     };
 
     try {
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), this.config.timeout || 60000);
+
       const response = await fetch(GrokProvider.API_URL, {
         method: "POST",
         headers: {
@@ -82,7 +88,10 @@ export class GrokProvider extends BaseProvider {
           "Content-Type": "application/json",
         },
         body: JSON.stringify(requestBody),
+        signal: controller.signal,
       });
+
+      clearTimeout(timeout);
 
       if (!response.ok) {
         const errorText = await response.text();
@@ -108,6 +117,9 @@ export class GrokProvider extends BaseProvider {
           : undefined,
       };
     } catch (error) {
+      if (error instanceof Error && error.name === 'AbortError') {
+        throw new Error(`Grok API request timed out after ${this.config.timeout || 60000}ms`);
+      }
       throw new Error(
         `Failed to generate completion with Grok: ${error instanceof Error ? error.message : String(error)}`,
       );
@@ -149,12 +161,15 @@ export class GrokProvider extends BaseProvider {
         ...messages.slice(0, -1),
         { role: "user", content: enhancedContent },
       ],
-      max_tokens: this.config.max_tokens || 2000,
+      max_tokens: this.config.max_tokens || DEFAULT_MAX_TOKENS,
       temperature: Math.min(this.config.temperature || 0.3, 0.3),
       stream: true, // Enable streaming
     };
 
     try {
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), this.config.timeout || 60000);
+
       const response = await fetch(GrokProvider.API_URL, {
         method: "POST",
         headers: {
@@ -162,7 +177,10 @@ export class GrokProvider extends BaseProvider {
           "Content-Type": "application/json",
         },
         body: JSON.stringify(requestBody),
+        signal: controller.signal,
       });
+
+      clearTimeout(timeout);
 
       if (!response.ok) {
         const errorText = await response.text();
@@ -214,8 +232,12 @@ export class GrokProvider extends BaseProvider {
                 };
               }
             } catch (error) {
-              // Skip invalid JSON lines - this is expected for some SSE events
-              // Silently ignore parsing errors
+              // Log parsing errors at debug level for debugging, but continue processing
+              // This is expected for some SSE events
+              if (error instanceof Error) {
+                // Debug level logging - would normally use a logger if available
+                // console.debug(`Stream parsing error (expected for some SSE events): ${error.message}`);
+              }
             }
           }
         }

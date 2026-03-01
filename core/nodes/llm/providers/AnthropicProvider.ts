@@ -8,6 +8,7 @@
 
 import { BaseProvider, LLMMessage, LLMResponse } from "./BaseProvider";
 import { ProviderConfig } from "../../../types";
+import { PromptBuilder } from "../PromptBuilder";
 import axios, { AxiosInstance, AxiosError } from "axios";
 
 interface AnthropicMessage {
@@ -92,7 +93,7 @@ export class AnthropicProvider extends BaseProvider {
 
     // If output schema is provided, add instruction to output JSON
     if (outputSchema) {
-      const systemContent = this.buildSystemPrompt(outputSchema);
+      const systemContent = PromptBuilder.buildOutputInstructions(outputSchema);
       if (request.system) {
         request.system = `${request.system}\n\n${systemContent}`;
       } else {
@@ -133,7 +134,10 @@ export class AnthropicProvider extends BaseProvider {
     }
   }
 
-  async generateCompletionStream(
+  // Note: This method has a different signature than the base class
+  // It uses a callback approach instead of AsyncGenerator
+  // For now, we'll keep it as a separate method to avoid breaking existing code
+  async generateCompletionStreamWithCallback(
     messages: LLMMessage[],
     outputSchema?: any,
     onStream?: (chunk: any) => void,
@@ -160,7 +164,7 @@ export class AnthropicProvider extends BaseProvider {
 
     // If output schema is provided, add instruction to output JSON
     if (outputSchema) {
-      const systemContent = this.buildSystemPrompt(outputSchema);
+      const systemContent = PromptBuilder.buildOutputInstructions(outputSchema);
       if (request.system) {
         request.system = `${request.system}\n\n${systemContent}`;
       } else {

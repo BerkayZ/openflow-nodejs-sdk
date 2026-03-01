@@ -241,6 +241,7 @@ export class ExecutionRegistry {
     this.data.variables.clear();
     this.data.nodeOutputs.clear();
     this.data.metadata.currentNode = undefined;
+    this.fileManager.cleanup();
   }
 
   /**

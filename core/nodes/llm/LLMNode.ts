@@ -12,6 +12,24 @@ import { ProviderFactory, LLMMessage } from "./providers";
 import { OutputFormatter } from "./OutputFormatter";
 import { MCPProvider, MCPConfig } from "../../mcp";
 
+// Interface for providers with streaming support
+interface StreamingProvider {
+  executeStream?: (node: FlowNode, context: NodeExecutionContext) => AsyncGenerator<any>;
+}
+
+// Interface for provider config with retry settings
+interface ProviderConfigWithRetry {
+  retry?: {
+    max_attempts?: number;
+    initial_delay?: number;
+    max_delay?: number;
+    backoff_factor?: number;
+  };
+}
+
+// Constants
+const MAX_MCP_ITERATIONS = 5;
+
 export class LLMNodeExecutor extends BaseNode {
   private mcpProvider?: MCPProvider;
 
@@ -374,7 +392,8 @@ export class LLMNodeExecutor extends BaseNode {
     };
 
     // Get retry configuration from node config
-    const retryConfig = (provider.config as any)?.retry;
+    const configWithRetry = provider.config as ProviderConfigWithRetry;
+    const retryConfig = configWithRetry?.retry;
 
     if (!this.mcpProvider || !this.mcpProvider.isInitialized()) {
       return await executeWithRetry(
@@ -383,7 +402,7 @@ export class LLMNodeExecutor extends BaseNode {
       );
     }
 
-    const maxIterations = 5;
+    const maxIterations = MAX_MCP_ITERATIONS;
     let currentMessages = messages;
     let iteration = 0;
     let totalTokens = 0;

@@ -36,12 +36,21 @@ export interface MCPToolsConfig {
   tool_selection?: "auto" | "manual";
 }
 
-// Provider configurations
+/**
+ * Provider configurations
+ * Note: Config keys use snake_case intentionally for JSON compatibility
+ * and consistency with API/configuration file formats
+ */
 export interface ProviderConfig {
   provider: string;
   model: string;
+  /** Maximum tokens to generate - snake_case for JSON compatibility */
   max_tokens?: number;
   temperature?: number;
+  /** Timeout in milliseconds for API calls */
+  timeout?: number;
+  /** Top-p sampling parameter */
+  top_p?: number;
   mcp_servers?: MCPServerConfig[];
   tools?: MCPToolsConfig;
   retry?: {
@@ -180,8 +189,12 @@ export interface VectorDeleteNode extends BaseNode {
 export interface ForEachNode extends BaseNode {
   type: NodeType.FOR_EACH;
   config: {
+    /** Delay between iterations in milliseconds - snake_case for JSON compatibility */
     delay_between?: number;
+    /** Key name for current iteration item - snake_case for JSON compatibility */
     each_key: string;
+    /** Whether to run iterations in parallel */
+    parallel?: boolean;
   };
   input: {
     items: string; // Variable reference

@@ -8,6 +8,7 @@
 
 import { BaseNode, NodeExecutionContext } from "../base/BaseNode";
 import { ForEachNode } from "../../types";
+import { NodeFactory } from "../base/NodeFactory";
 
 export class ForEachNodeExecutor extends BaseNode {
   async execute(
@@ -109,7 +110,32 @@ export class ForEachNodeExecutor extends BaseNode {
           };
         });
 
-        results = await Promise.all(promises);
+        const settledResults = await Promise.allSettled(promises);
+
+        // Collect successful results and errors
+        const errors: Error[] = [];
+        results = [];
+
+        for (let i = 0; i < settledResults.length; i++) {
+          const settledResult = settledResults[i];
+          if (settledResult.status === 'fulfilled') {
+            results.push(settledResult.value);
+          } else {
+            errors.push(new Error(`Item ${i} failed: ${settledResult.reason}`));
+            // Push a partial result for failed items
+            results.push({
+              item: inputList[i],
+              index: i,
+              results: [],
+              error: settledResult.reason
+            });
+          }
+        }
+
+        // If any errors occurred, throw an aggregate error
+        if (errors.length > 0) {
+          throw new AggregateError(errors, `${errors.length} of ${settledResults.length} items failed in parallel execution`);
+        }
       } else {
         // Sequential execution with delay support
         results = [];
@@ -326,8 +352,7 @@ export class ForEachNodeExecutor extends BaseNode {
     node: any,
     context: NodeExecutionContext,
   ): Promise<any> {
-    const NodeFactory = await import("../base/NodeFactory");
-    const nodeExecutor = NodeFactory.NodeFactory.create(node.type);
+    const nodeExecutor = NodeFactory.create(node.type);
     return await nodeExecutor.executeWithContext(node, context);
   }
 

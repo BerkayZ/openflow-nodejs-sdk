@@ -22,6 +22,14 @@ import { NodeFactory } from "../nodes/base/NodeFactory";
 import { NodeExecutionContext } from "../nodes/base/BaseNode";
 import { Logger } from "../utils/Logger";
 
+// Interface for nodes with streaming support
+interface StreamingNode {
+  executeStream?: (node: any, context: any) => AsyncGenerator<any>;
+}
+
+// Constants
+const MAX_SHUTDOWN_WAIT_SECONDS = 30;
+
 export class FlowExecutor {
   private config: FlowExecutorConfig;
   private executionQueue: QueuedFlow[] = [];
@@ -140,7 +148,7 @@ export class FlowExecutor {
         // Check if this is an LLM node that supports streaming
         if (node.type === "LLM" && this.config.enableStreaming !== false) {
           // Stream LLM responses
-          const nodeExecutor = NodeFactory.createNode(node.type);
+          const nodeExecutor = NodeFactory.create(node.type);
           const context: NodeExecutionContext = {
             registry,
             flowId,
@@ -149,7 +157,7 @@ export class FlowExecutor {
           };
 
           // Check if the node executor has a streaming method
-          const llmNode = nodeExecutor as any;
+          const llmNode = nodeExecutor as StreamingNode;
           if (llmNode.executeStream) {
             const streamGenerator = llmNode.executeStream(node, context);
 
@@ -529,7 +537,7 @@ export class FlowExecutor {
    */
   private async waitForRunningFlows(): Promise<void> {
     let attempts = 0;
-    const maxAttempts = 30; // 30 seconds timeout
+    const maxAttempts = MAX_SHUTDOWN_WAIT_SECONDS;
 
     while (this.runningFlows.size > 0 && attempts < maxAttempts) {
       this.logger.info(

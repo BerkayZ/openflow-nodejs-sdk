@@ -8,6 +8,7 @@
 
 import { BaseNode, NodeExecutionContext } from "../base/BaseNode";
 import { ConditionNode, ConditionOperator } from "../../types";
+import { NodeFactory } from "../base/NodeFactory";
 
 export class ConditionNodeExecutor extends BaseNode {
   async execute(
@@ -163,8 +164,7 @@ export class ConditionNodeExecutor extends BaseNode {
     node: any,
     context: NodeExecutionContext,
   ): Promise<any> {
-    const NodeFactory = await import("../base/NodeFactory");
-    const nodeExecutor = NodeFactory.NodeFactory.create(node.type);
+    const nodeExecutor = NodeFactory.create(node.type);
     return await nodeExecutor.executeWithContext(node, context);
   }
 }

@@ -72,13 +72,13 @@ export abstract class BaseNode {
   ): string {
     return text.replace(/\{\{([^}]+)\}\}/g, (match, expression) => {
       const value = registry.resolveExpression(expression.trim());
-      if (value !== undefined) {
+      if (value !== undefined && value !== null) {
         // Handle objects and arrays by converting to JSON string
         if (typeof value === "object") {
           return Array.isArray(value)
             ? value
                 .map((item) =>
-                  typeof item === "object"
+                  item !== null && item !== undefined && typeof item === "object"
                     ? JSON.stringify(item)
                     : String(item),
                 )
@@ -95,11 +95,16 @@ export abstract class BaseNode {
    * Resolve variables in an object (recursively)
    */
   protected resolveObjectVariables(obj: any, registry: ExecutionRegistry): any {
+    // Handle null and undefined
+    if (obj === null || obj === undefined) {
+      return obj;
+    }
+
     if (typeof obj === "string") {
       return this.resolveValueExpression(obj, registry);
     } else if (Array.isArray(obj)) {
       return obj.map((item) => this.resolveObjectVariables(item, registry));
-    } else if (obj && typeof obj === "object") {
+    } else if (typeof obj === "object") {
       const resolved: any = {};
       for (const [key, value] of Object.entries(obj)) {
         resolved[key] = this.resolveObjectVariables(value, registry);

@@ -10,6 +10,9 @@ import { BaseProvider, LLMMessage, LLMResponse, StreamChunk } from "./BaseProvid
 import { ProviderConfig, OutputSchema } from "../../../types";
 import { PromptBuilder } from "../PromptBuilder";
 
+// Constants
+const DEFAULT_MAX_TOKENS = 2000;
+
 export class OpenAIProvider extends BaseProvider {
   private static readonly API_URL = "https://api.openai.com/v1/responses";
 
@@ -149,7 +152,7 @@ export class OpenAIProvider extends BaseProvider {
     const requestBody = {
       model: this.config.model || "gpt-4.1",
       input: input,
-      max_output_tokens: this.config.max_tokens || 2000,
+      max_output_tokens: this.config.max_tokens || DEFAULT_MAX_TOKENS,
       temperature: this.config.temperature || 1.0,
       top_p: 1.0,
       stream: false,
@@ -161,6 +164,9 @@ export class OpenAIProvider extends BaseProvider {
     };
 
     try {
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), this.config.timeout || 60000);
+
       const response = await fetch(OpenAIProvider.API_URL, {
         method: "POST",
         headers: {
@@ -168,7 +174,10 @@ export class OpenAIProvider extends BaseProvider {
           "Content-Type": "application/json",
         },
         body: JSON.stringify(requestBody),
+        signal: controller.signal,
       });
+
+      clearTimeout(timeout);
 
       if (!response.ok) {
         const errorText = await response.text();
@@ -210,6 +219,9 @@ export class OpenAIProvider extends BaseProvider {
           : undefined,
       };
     } catch (error) {
+      if (error instanceof Error && error.name === 'AbortError') {
+        throw new Error(`OpenAI API request timed out after ${this.config.timeout || 60000}ms`);
+      }
       throw new Error(
         `Failed to generate completion with OpenAI: ${error instanceof Error ? error.message : String(error)}`,
       );
@@ -225,7 +237,7 @@ export class OpenAIProvider extends BaseProvider {
     const requestBody = {
       model: this.config.model || "gpt-4.1",
       input: input,
-      max_output_tokens: this.config.max_tokens || 2000,
+      max_output_tokens: this.config.max_tokens || DEFAULT_MAX_TOKENS,
       temperature: this.config.temperature || 1.0,
       top_p: 1.0,
       stream: true, // Enable streaming
@@ -237,6 +249,9 @@ export class OpenAIProvider extends BaseProvider {
     };
 
     try {
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), this.config.timeout || 60000);
+
       const response = await fetch(OpenAIProvider.API_URL, {
         method: "POST",
         headers: {
@@ -244,7 +259,10 @@ export class OpenAIProvider extends BaseProvider {
           "Content-Type": "application/json",
         },
         body: JSON.stringify(requestBody),
+        signal: controller.signal,
       });
+
+      clearTimeout(timeout);
 
       if (!response.ok) {
         const errorText = await response.text();
@@ -303,8 +321,12 @@ export class OpenAIProvider extends BaseProvider {
                 };
               }
             } catch (error) {
-              // Skip invalid JSON lines - this is expected for some SSE events
-              // Silently ignore parsing errors
+              // Log parsing errors at debug level for debugging, but continue processing
+              // This is expected for some SSE events
+              if (error instanceof Error) {
+                // Debug level logging - would normally use a logger if available
+                // console.debug(`Stream parsing error (expected for some SSE events): ${error.message}`);
+              }
             }
           }
         }
