@@ -26,7 +26,7 @@ describe("FlowValidator", () => {
             type: NodeType.UPDATE_VARIABLE,
             name: "Test Node",
             config: { type: "update", variable_id: "output_var" },
-            value: "{{input_var}}",
+            value: "{{@input_var}}",
           },
         ],
       };
@@ -113,7 +113,7 @@ describe("FlowValidator", () => {
               {
                 type: "text",
                 role: "user",
-                text: "{{prompt}}",
+                text: "{{@prompt}}",
               },
             ],
             output: {
@@ -144,7 +144,7 @@ describe("FlowValidator", () => {
             id: "condition_node",
             type: NodeType.CONDITION,
             name: "Score Evaluation",
-            input: { switch_value: "{{score}}" },
+            input: { switch_value: "{{@score}}" },
             branches: {
               high: {
                 condition: "greater_than",
@@ -198,7 +198,7 @@ describe("FlowValidator", () => {
               each_key: "current_item",
             },
             input: {
-              items: "{{items}}",
+              items: "{{@items}}",
             },
             each_nodes: [
               {
@@ -223,11 +223,11 @@ describe("FlowValidator", () => {
   });
 
   describe("Variable Reference Validation", () => {
-    test("should validate forward references", () => {
-      const invalidReferenceFlow = {
-        name: "invalid-ref-flow",
+    test("should handle forward references correctly", () => {
+      const forwardReferenceFlow = {
+        name: "forward-ref-flow",
         version: "1.0.0",
-        description: "Invalid reference test",
+        description: "Forward reference test",
         author: "Test Suite",
         variables: [{ id: "result" }],
         input: [],
@@ -238,7 +238,7 @@ describe("FlowValidator", () => {
             type: NodeType.UPDATE_VARIABLE,
             name: "Node A",
             config: { type: "update", variable_id: "result" },
-            value: "{{node_b.output}}", // Forward reference
+            value: "{{node_b.output}}", // Forward reference - valid with proper execution order
           },
           {
             id: "node_b",
@@ -250,12 +250,13 @@ describe("FlowValidator", () => {
         ],
       };
 
-      const result = FlowValidator.validateFlow(invalidReferenceFlow);
+      const result = FlowValidator.validateFlow(forwardReferenceFlow);
 
-      expect(result.isValid).toBe(false);
-      expect(
-        result.errors.some((err) => err.code.includes("FORWARD_REFERENCE")),
-      ).toBe(true);
+      // Forward references are valid as long as the dependency graph can resolve execution order
+      expect(result.isValid).toBe(true);
+      expect(result.dependencyGraph).toBeDefined();
+      // Verify node_b executes before node_a
+      expect(result.dependencyGraph?.executionOrder).toEqual(["node_b", "node_a"]);
     });
 
     test("should detect circular dependencies", () => {
@@ -307,7 +308,7 @@ describe("FlowValidator", () => {
             type: NodeType.UPDATE_VARIABLE,
             name: "Interpolation Test",
             config: { type: "update", variable_id: "output_var" },
-            value: "Hello {{input_var}}!", // Valid interpolation
+            value: "Hello {{@input_var}}!", // Valid interpolation
           },
         ],
       };

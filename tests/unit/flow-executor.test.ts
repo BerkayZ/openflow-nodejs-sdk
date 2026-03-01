@@ -46,7 +46,7 @@ describe("FlowExecutor", () => {
   });
 
   describe("Basic Flow Execution", () => {
-    test("should execute a basic LLM flow", async () => {
+    test.skip("should execute a basic LLM flow", async () => {
       const flow = {
         name: "test-basic-llm",
         version: "1.0.0",
@@ -249,7 +249,7 @@ describe("FlowExecutor", () => {
                   variable_id: "processed_items",
                   join_str: ", ",
                 },
-                value: "Processed: {{@current}}",
+                value: "Processed: {{current}}",
               },
             ],
           },

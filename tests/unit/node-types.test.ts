@@ -125,7 +125,7 @@ describe("Node Types Unit Tests", () => {
         type: NodeType.CONDITION,
         name: "Test Condition",
         input: {
-          switch_value: "{{variable_to_check}}",
+          switch_value: "{{@variable_to_check}}",
         },
         branches: {
           case_1: {
@@ -290,7 +290,7 @@ describe("Node Types Unit Tests", () => {
           type: "update",
           variable_id: "test_variable",
         },
-        value: "{{source_variable}}",
+        value: "{{@source_variable}}",
       };
 
       expect(validUpdateNode).toHaveProperty("id");

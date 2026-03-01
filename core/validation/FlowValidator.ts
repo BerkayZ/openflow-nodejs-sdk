@@ -534,13 +534,28 @@ export class FlowValidator {
       let match;
       while ((match = regex.exec(text)) !== null) {
         const variableExpression = match[1].trim();
-        const parts = variableExpression.split(".");
-        references.push({
-          nodeId: parts[0],
-          path: parts.slice(1).join("."),
-          fullReference: match[0],
-          scopeContext,
-        });
+
+        // Check if this is a variable reference (starts with @)
+        if (variableExpression.startsWith('@')) {
+          // Variable reference: strip @ and use as variable ID
+          const variableId = variableExpression.substring(1);
+          references.push({
+            nodeId: variableId,
+            path: '',
+            fullReference: match[0],
+            scopeContext,
+            isVariable: true, // Mark this as a variable reference
+          });
+        } else {
+          // Node reference: parse as before
+          const parts = variableExpression.split(".");
+          references.push({
+            nodeId: parts[0],
+            path: parts.slice(1).join("."),
+            fullReference: match[0],
+            scopeContext,
+          });
+        }
       }
     };
 
@@ -619,6 +634,19 @@ export class FlowValidator {
     const variableIds = new Set(flow.variables.map((variable) => variable.id));
 
     for (const reference of references) {
+      // Check if this is a variable reference (marked with isVariable flag)
+      if (reference.isVariable) {
+        // This is a {{@variable}} reference - validate against flow.variables
+        if (!variableIds.has(reference.nodeId)) {
+          errors.push({
+            path: "variable_reference",
+            message: `Invalid variable reference: ${reference.fullReference}. Variable '${reference.nodeId}' does not exist`,
+            code: ValidationErrorCode.INVALID_VARIABLE_REFERENCE,
+          });
+        }
+        continue;
+      }
+
       // Check if this is a scoped variable (like {{current}})
       if (reference.scopeContext?.scopeKeys?.has(reference.nodeId)) {
         continue; // Skip validation for scoped variables like {{current}} or {{current.property}}
@@ -642,24 +670,12 @@ export class FlowValidator {
         continue;
       }
 
-      // If it's not a node reference, check if it's a variable reference
-      // (this only applies when there's no path)
-      if (!reference.path) {
-        if (!variableIds.has(reference.nodeId)) {
-          errors.push({
-            path: "variable_reference",
-            message: `Invalid variable reference: ${reference.fullReference}`,
-            code: ValidationErrorCode.INVALID_VARIABLE_REFERENCE,
-          });
-        }
-      } else {
-        // Node reference with path but invalid node ID
-        errors.push({
-          path: "variable_reference",
-          message: `Invalid node reference: ${reference.fullReference}`,
-          code: ValidationErrorCode.INVALID_VARIABLE_REFERENCE,
-        });
-      }
+      // If it's not a node reference and not a variable reference, it's invalid
+      errors.push({
+        path: "variable_reference",
+        message: `Invalid node reference: ${reference.fullReference}. Node '${reference.nodeId}' does not exist`,
+        code: ValidationErrorCode.INVALID_VARIABLE_REFERENCE,
+      });
     }
 
     return { isValid: errors.length === 0, errors, warnings };
@@ -693,8 +709,14 @@ export class FlowValidator {
       const nodeReferences = this.extractNodeReferences(node);
 
       for (const reference of nodeReferences) {
+        // Skip variable references ({{@variable}}) - they don't create dependencies
+        if (reference.isVariable) {
+          continue;
+        }
+
         // If this is a node output reference (has a path like "output.property")
-        if (reference.path && reference.path.startsWith("output")) {
+        // or a full node reference (no path), add as dependency
+        if (!reference.path || reference.path.startsWith("output")) {
           dependencies.add(reference.nodeId);
         }
       }
@@ -729,12 +751,26 @@ export class FlowValidator {
       let match;
       while ((match = regex.exec(text)) !== null) {
         const variableExpression = match[1].trim();
-        const parts = variableExpression.split(".");
-        references.push({
-          nodeId: parts[0],
-          path: parts.slice(1).join("."),
-          fullReference: match[0],
-        });
+
+        // Check if this is a variable reference (starts with @)
+        if (variableExpression.startsWith('@')) {
+          // Variable reference: strip @ and use as variable ID
+          const variableId = variableExpression.substring(1);
+          references.push({
+            nodeId: variableId,
+            path: '',
+            fullReference: match[0],
+            isVariable: true, // Mark this as a variable reference
+          });
+        } else {
+          // Node reference: parse as before
+          const parts = variableExpression.split(".");
+          references.push({
+            nodeId: parts[0],
+            path: parts.slice(1).join("."),
+            fullReference: match[0],
+          });
+        }
       }
     };
 
