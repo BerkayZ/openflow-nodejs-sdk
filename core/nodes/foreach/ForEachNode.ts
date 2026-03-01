@@ -36,73 +36,139 @@ export class ForEachNodeExecutor extends BaseNode {
         );
       }
 
-      // Get delay configuration
+      // Get configuration
       const delayBetween = node.config.delay_between || 0;
       const eachKey = node.config.each_key || "current";
+      const parallel = node.config.parallel || false;
 
       this.log(
         context,
         "debug",
-        `Processing ${inputList.length} items with delay ${delayBetween}ms, each_key: ${eachKey}`,
+        `Processing ${inputList.length} items with delay ${delayBetween}ms, each_key: ${eachKey}, parallel: ${parallel}`,
       );
 
       // Process each item in the list
-      const results = [];
-      for (let i = 0; i < inputList.length; i++) {
-        const currentItem = inputList[i];
+      let results;
 
+      if (parallel) {
+        // Parallel execution using Promise.all
         this.log(
           context,
-          "debug",
-          `Processing item ${i + 1}/${inputList.length}: ${JSON.stringify(currentItem)}`,
+          "info",
+          `Processing ${inputList.length} items in parallel`,
         );
 
-        // Create scoped registry for this iteration
-        const scopedRegistry = this.createScopedRegistry(
-          context.registry,
-          eachKey,
-          currentItem,
-          i,
-        );
-
-        // Execute each node in the each_nodes array
-        const iterationResults = [];
-        for (const eachNode of node.each_nodes) {
+        const promises = inputList.map(async (currentItem, i) => {
           this.log(
             context,
             "debug",
-            `Executing node '${eachNode.id}' (${eachNode.type}) for item ${i + 1}`,
+            `Processing item ${i + 1}/${inputList.length}: ${JSON.stringify(currentItem)}`,
           );
 
-          const result = await this.executeNode(eachNode, {
-            ...context,
-            registry: scopedRegistry,
-          });
+          // Create scoped registry for this iteration
+          const scopedRegistry = this.createScopedRegistry(
+            context.registry,
+            eachKey,
+            currentItem,
+            i,
+          );
 
-          iterationResults.push({
-            nodeId: eachNode.id,
-            nodeType: eachNode.type,
-            result: result.success ? result.output : null,
-            success: result.success,
-            error: result.error?.message,
-            executionTime: result.executionTime,
-          });
+          // Execute each node in the each_nodes array
+          const iterationResults = [];
+          for (const eachNode of node.each_nodes) {
+            this.log(
+              context,
+              "debug",
+              `Executing node '${eachNode.id}' (${eachNode.type}) for item ${i + 1}`,
+            );
 
-          // Store the result in the scoped registry for subsequent nodes
-          if (result.success) {
-            scopedRegistry.setNodeOutput(eachNode.id, result.output);
+            const result = await this.executeNode(eachNode, {
+              ...context,
+              registry: scopedRegistry,
+            });
+
+            iterationResults.push({
+              nodeId: eachNode.id,
+              nodeType: eachNode.type,
+              result: result.success ? result.output : null,
+              success: result.success,
+              error: result.error?.message,
+              executionTime: result.executionTime,
+            });
+
+            // Store the result in the scoped registry for subsequent nodes
+            if (result.success) {
+              scopedRegistry.setNodeOutput(eachNode.id, result.output);
+            }
           }
-        }
 
-        results.push({
-          item: currentItem,
-          index: i,
-          results: iterationResults,
+          return {
+            item: currentItem,
+            index: i,
+            results: iterationResults,
+          };
         });
 
-        // Apply delay between iterations if specified
-        if (delayBetween > 0 && i < inputList.length - 1) {
-          await this.delay(delayBetween);
+        results = await Promise.all(promises);
+      } else {
+        // Sequential execution with delay support
+        results = [];
+        for (let i = 0; i < inputList.length; i++) {
+          const currentItem = inputList[i];
+
+          this.log(
+            context,
+            "debug",
+            `Processing item ${i + 1}/${inputList.length}: ${JSON.stringify(currentItem)}`,
+          );
+
+          // Create scoped registry for this iteration
+          const scopedRegistry = this.createScopedRegistry(
+            context.registry,
+            eachKey,
+            currentItem,
+            i,
+          );
+
+          // Execute each node in the each_nodes array
+          const iterationResults = [];
+          for (const eachNode of node.each_nodes) {
+            this.log(
+              context,
+              "debug",
+              `Executing node '${eachNode.id}' (${eachNode.type}) for item ${i + 1}`,
+            );
+
+            const result = await this.executeNode(eachNode, {
+              ...context,
+              registry: scopedRegistry,
+            });
+
+            iterationResults.push({
+              nodeId: eachNode.id,
+              nodeType: eachNode.type,
+              result: result.success ? result.output : null,
+              success: result.success,
+              error: result.error?.message,
+              executionTime: result.executionTime,
+            });
+
+            // Store the result in the scoped registry for subsequent nodes
+            if (result.success) {
+              scopedRegistry.setNodeOutput(eachNode.id, result.output);
+            }
+          }
+
+          results.push({
+            item: currentItem,
+            index: i,
+            results: iterationResults,
+          });
+
+          // Apply delay between iterations if specified (only in sequential mode)
+          if (delayBetween > 0 && i < inputList.length - 1) {
+            await this.delay(delayBetween);
+          }
         }
       }
 
