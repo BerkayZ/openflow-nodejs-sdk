@@ -17,6 +17,7 @@ export enum NodeType {
   FOR_EACH = "FOR_EACH",
   UPDATE_VARIABLE = "UPDATE_VARIABLE",
   CONDITION = "CONDITION",
+  CONVERSATION_MEMORY = "CONVERSATION_MEMORY",
 }
 
 export enum ValidationErrorCode {

@@ -19,6 +19,7 @@ import { TextEmbeddingNodeExecutor } from "../embedding";
 import { ConditionNodeExecutor } from "../condition";
 import { DocumentSplitterNodeExecutor } from "../document";
 import { ForEachNodeExecutor } from "../foreach";
+import { ConversationMemoryNode } from "../memory/ConversationMemoryNode";
 import { Logger } from "../../utils/Logger";
 
 type NodeExecutorConstructor = new () => BaseNode;
@@ -43,6 +44,7 @@ export class NodeFactory {
     );
     NodeFactory.register(NodeType.FOR_EACH, ForEachNodeExecutor);
     NodeFactory.register(NodeType.VECTOR_DELETE, VectorDeleteNodeExecutor);
+    NodeFactory.register(NodeType.CONVERSATION_MEMORY, ConversationMemoryNode);
 
     // Future node types will be registered here:
     // NodeFactory.register('VECTOR_UPDATE', VectorUpdateNodeExecutor);
