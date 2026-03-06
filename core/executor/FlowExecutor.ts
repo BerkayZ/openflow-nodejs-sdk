@@ -1,4 +1,4 @@
-/*
+﻿/*
  * FlowExecutor
  * OpenFlow Node.JS SDK - Copyright (C) 2025 Berkay Zelyurt
  *
@@ -303,7 +303,7 @@ export class FlowExecutor {
 
       // Get execution order
       const executionOrder = this.getExecutionOrder(queuedFlow.flow);
-      this.logger.debug(`Execution order: ${executionOrder.join(" → ")}`);
+      this.logger.debug(`Execution order: ${executionOrder.join(" â†’ ")}`);
 
       // Execute nodes sequentially
       await this.executeNodes(
@@ -331,7 +331,8 @@ export class FlowExecutor {
             flowId: queuedFlow.id,
             executionTime: result.executionTime,
             outputs,
-          });
+          nodeOutputs: registry.getAllNodeOutputs(),
+          })
         } catch (hookError) {
           this.logger.warn(
             `onComplete hook failed: ${hookError instanceof Error ? hookError.message : "Unknown error"}`,
@@ -419,7 +420,8 @@ export class FlowExecutor {
               node,
               flowId: registry.getMetadata().flowId,
               executionTime: nodeExecutionTime,
-            });
+              output: result.output,
+            })
             if (signal === HookSignal.STOP) {
               this.logger.info(
                 `Flow execution stopped by afterNode hook at node ${nodeId}`,
@@ -566,3 +568,6 @@ export class FlowExecutor {
     }
   }
 }
+
+
+
