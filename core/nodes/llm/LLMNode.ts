@@ -226,7 +226,7 @@ export class LLMNodeExecutor extends BaseNode {
    */
   private convertToProviderMessages(messages: any[]): LLMMessage[] {
     return messages.map((msg) => {
-      if (msg.type === "text") {
+      if (!msg.type || msg.type === "text") {
         return {
           role: msg.role,
           content: msg.text,
@@ -569,5 +569,6 @@ export class LLMNodeExecutor extends BaseNode {
     }
   }
 }
+
 
 
