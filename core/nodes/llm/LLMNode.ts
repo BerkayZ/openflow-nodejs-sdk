@@ -145,7 +145,7 @@ export class LLMNodeExecutor extends BaseNode {
     context: NodeExecutionContext,
   ): any[] {
     return llmNode.messages.map((message) => {
-      if (message.type === "text") {
+      if (!message.type || message.type === "text") {
         return {
           ...message,
           text: this.resolveVariables((message as any).text || (message as any).content || '', context.registry),
@@ -569,4 +569,5 @@ export class LLMNodeExecutor extends BaseNode {
     }
   }
 }
+
 
