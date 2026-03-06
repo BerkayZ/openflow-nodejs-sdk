@@ -1,4 +1,4 @@
-/*
+﻿/*
  * LLMNode
  * OpenFlow Node.JS SDK - Copyright (C) 2025 Berkay Zelyurt
  *
@@ -148,7 +148,7 @@ export class LLMNodeExecutor extends BaseNode {
       if (message.type === "text") {
         return {
           ...message,
-          text: this.resolveVariables(message.text, context.registry),
+          text: this.resolveVariables((message as any).text || (message as any).content || '', context.registry),
         };
       } else if (message.type === "image") {
         const resolvedMessage = { ...message };
@@ -569,3 +569,4 @@ export class LLMNodeExecutor extends BaseNode {
     }
   }
 }
+

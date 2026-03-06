@@ -1,4 +1,4 @@
-export interface ExecutionResult {
+﻿export interface ExecutionResult {
   success: boolean;
   flowId: string;
   executionTime: number;
@@ -40,6 +40,7 @@ export interface NodeHookContext {
   node: any;
   flowId: string;
   executionTime?: number;
+  output?: any;
 }
 
 export interface ErrorHookContext {
@@ -52,6 +53,7 @@ export interface CompleteHookContext {
   flowId: string;
   executionTime: number;
   outputs: Record<string, any>;
+  nodeOutputs?: Record<string, any>;
 }
 
 export interface FlowHooks {
@@ -60,3 +62,4 @@ export interface FlowHooks {
   onError?: (context: ErrorHookContext) => Promise<HookSignal> | HookSignal;
   onComplete?: (context: CompleteHookContext) => Promise<void> | void;
 }
+
