@@ -55,6 +55,7 @@ export interface BaseFlowNode {
   type: NodeType;
   name: string;
   config?: Record<string, any>;
+  depends_on?: string[];
   [key: string]: any; // Allow additional properties
 }
 

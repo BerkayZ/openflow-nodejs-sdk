@@ -67,6 +67,10 @@ export class FlowValidator {
       // Step 5: Complexity analysis
       const complexity = this.analyzeComplexity(flow);
 
+      if (dependencyResult.graph) {
+        dependencyResult.graph.executionLevels = this.groupByLevels(dependencyResult.graph);
+      }
+
       return {
         isValid: errors.length === 0,
         errors,
@@ -721,6 +725,13 @@ export class FlowValidator {
         }
       }
 
+      // Also add explicit depends_on entries as dependencies
+      if (Array.isArray(node.depends_on)) {
+        for (const dep of node.depends_on) {
+          dependencies.add(dep);
+        }
+      }
+
       graph.nodes.set(node.id, dependencies);
     }
 
@@ -977,6 +988,28 @@ export class FlowValidator {
     }
 
     return { isValid: true };
+  }
+
+  /**
+   * Group nodes into parallel execution levels based on their dependencies
+   */
+  private static groupByLevels(graph: DependencyGraph): string[][] {
+    const levels = new Map<string, number>();
+    for (const nodeId of graph.executionOrder) {
+      const deps = graph.nodes.get(nodeId) || new Set();
+      if (deps.size === 0) {
+        levels.set(nodeId, 0);
+      } else {
+        const maxDepLevel = Math.max(...[...deps].map(d => levels.get(d) ?? 0));
+        levels.set(nodeId, maxDepLevel + 1);
+      }
+    }
+    const grouped = new Map<number, string[]>();
+    for (const [nodeId, level] of levels) {
+      if (!grouped.has(level)) grouped.set(level, []);
+      grouped.get(level)!.push(nodeId);
+    }
+    return [...grouped.entries()].sort(([a], [b]) => a - b).map(([, nodes]) => nodes);
   }
 
   /**

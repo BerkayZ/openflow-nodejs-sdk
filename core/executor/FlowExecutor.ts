@@ -138,7 +138,7 @@ export class FlowExecutor {
     );
 
     try {
-      // Execute nodes in order with streaming
+      // TODO: Implement level-based parallel execution for stream mode (currently sequential)
       const executionOrder = this.getExecutionOrder(flow);
 
       for (const nodeId of executionOrder) {
@@ -301,13 +301,8 @@ export class FlowExecutor {
     try {
       this.logger.info(`Starting flow execution: ${queuedFlow.id}`);
 
-      // Get execution order
-      const executionOrder = this.getExecutionOrder(queuedFlow.flow);
-      this.logger.debug(`Execution order: ${executionOrder.join(" â†’ ")}`);
-
-      // Execute nodes sequentially
+      // Execute nodes level by level (parallel within each level)
       await this.executeNodes(
-        executionOrder,
         queuedFlow.flow,
         registry,
         queuedFlow.hooks,
@@ -369,99 +364,86 @@ export class FlowExecutor {
   }
 
   /**
-   * Execute all nodes in order
+   * Execute nodes level by level, running nodes within each level in parallel
    */
   private async executeNodes(
-    executionOrder: string[],
     flow: FlowDefinition,
     registry: ExecutionRegistry,
     hooks?: FlowHooks,
   ): Promise<void> {
-    for (const nodeId of executionOrder) {
-      const node = flow.nodes.find((n) => n.id === nodeId);
-      if (!node) {
-        throw new Error(`Node ${nodeId} not found in flow definition`);
-      }
+    const levels = this.getExecutionLevels(flow);
+    let shouldStop = false;
 
-      // Call beforeNode hook
-      if (hooks?.beforeNode) {
-        try {
-          await hooks.beforeNode({
-            node,
-            flowId: registry.getMetadata().flowId,
-          });
-        } catch (hookError) {
-          this.logger.warn(
-            `beforeNode hook failed: ${hookError instanceof Error ? hookError.message : "Unknown error"}`,
-          );
-        }
-      }
+    for (const level of levels) {
+      if (shouldStop) break;
 
-      this.logger.info(`Executing node: ${nodeId} (${node.type})`);
+      await Promise.all(
+        level.map(async (nodeId) => {
+          const node = flow.nodes.find((n) => n.id === nodeId);
+          if (!node) throw new Error(`Node ${nodeId} not found in flow definition`);
 
-      try {
-        const nodeStartTime = Date.now();
-        const result = await this.executeNode(node, registry);
-
-        if (!result.success) {
-          throw result.error || new Error("Node execution failed");
-        }
-
-        // Store node output in registry
-        registry.setNodeOutput(nodeId, result.output);
-
-        const nodeExecutionTime = Date.now() - nodeStartTime;
-        this.logger.info(`Node ${nodeId} completed in ${nodeExecutionTime}ms`);
-
-        // Call afterNode hook
-        if (hooks?.afterNode) {
-          try {
-            const signal = await hooks.afterNode({
-              node,
-              flowId: registry.getMetadata().flowId,
-              executionTime: nodeExecutionTime,
-              output: result.output,
-            })
-            if (signal === HookSignal.STOP) {
-              this.logger.info(
-                `Flow execution stopped by afterNode hook at node ${nodeId}`,
+          if (hooks?.beforeNode) {
+            try {
+              await hooks.beforeNode({ node, flowId: registry.getMetadata().flowId });
+            } catch (hookError) {
+              this.logger.warn(
+                `beforeNode hook failed: ${hookError instanceof Error ? hookError.message : "Unknown error"}`,
               );
-              break;
             }
-          } catch (hookError) {
-            this.logger.warn(
-              `afterNode hook failed: ${hookError instanceof Error ? hookError.message : "Unknown error"}`,
-            );
           }
-        }
-      } catch (error) {
-        const errorMessage = `Node ${nodeId} execution failed: ${error instanceof Error ? error.message : "Unknown error"}`;
-        this.logger.error(errorMessage);
 
-        // Call onError hook
-        if (hooks?.onError) {
-          try {
-            const signal = await hooks.onError({
-              error: error instanceof Error ? error : new Error(errorMessage),
-              node,
-              flowId: registry.getMetadata().flowId,
-            });
-            if (signal === HookSignal.CONTINUE) {
-              this.logger.info(
-                `Flow execution continuing after error in node ${nodeId} due to onError hook`,
+          this.logger.info(`Executing node: ${nodeId} (${node.type})`);
+          const nodeStartTime = Date.now();
+          const result = await this.executeNode(node, registry);
+
+          if (!result.success) {
+            if (hooks?.onError) {
+              try {
+                const signal = await hooks.onError({
+                  error: result.error || new Error('Node execution failed'),
+                  node,
+                  flowId: registry.getMetadata().flowId,
+                });
+                if (signal === HookSignal.CONTINUE) return;
+              } catch {}
+            }
+            throw result.error || new Error(`Node ${nodeId} failed`);
+          }
+
+          registry.setNodeOutput(nodeId, result.output);
+          const nodeExecutionTime = Date.now() - nodeStartTime;
+          this.logger.info(`Node ${nodeId} completed in ${nodeExecutionTime}ms`);
+
+          if (hooks?.afterNode) {
+            try {
+              const signal = await hooks.afterNode({
+                node,
+                flowId: registry.getMetadata().flowId,
+                executionTime: nodeExecutionTime,
+                output: result.output,
+              });
+              if (signal === HookSignal.STOP) shouldStop = true;
+            } catch (hookError) {
+              this.logger.warn(
+                `afterNode hook failed: ${hookError instanceof Error ? hookError.message : "Unknown error"}`,
               );
-              continue;
             }
-          } catch (hookError) {
-            this.logger.warn(
-              `onError hook failed: ${hookError instanceof Error ? hookError.message : "Unknown error"}`,
-            );
           }
-        }
-
-        throw new Error(errorMessage);
-      }
+        }),
+      );
     }
+  }
+
+  /**
+   * Get execution levels from flow validation (for parallel execution)
+   */
+  private getExecutionLevels(flow: FlowDefinition): string[][] {
+    const validation = FlowValidator.validateFlow(flow);
+    const levels = validation.dependencyGraph?.executionLevels;
+    if (!levels || levels.length === 0) {
+      throw new Error('No execution levels determined - possible circular dependency');
+    }
+    return levels;
   }
 
   /**

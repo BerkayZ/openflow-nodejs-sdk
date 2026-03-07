@@ -16,6 +16,7 @@ export interface ValidationResult {
 export interface DependencyGraph {
   nodes: Map<string, Set<string>>; // node_id -> dependencies
   executionOrder: string[];
+  executionLevels?: string[][];
 }
 
 export interface VariableReference {
