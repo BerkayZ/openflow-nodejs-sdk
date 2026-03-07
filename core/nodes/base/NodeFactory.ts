@@ -20,6 +20,7 @@ import { ConditionNodeExecutor } from "../condition";
 import { DocumentSplitterNodeExecutor } from "../document";
 import { ForEachNodeExecutor } from "../foreach";
 import { ConversationMemoryNode } from "../memory/ConversationMemoryNode";
+import { FlowCallNode } from "../flowcall";
 import { Logger } from "../../utils/Logger";
 
 type NodeExecutorConstructor = new () => BaseNode;
@@ -45,6 +46,7 @@ export class NodeFactory {
     NodeFactory.register(NodeType.FOR_EACH, ForEachNodeExecutor);
     NodeFactory.register(NodeType.VECTOR_DELETE, VectorDeleteNodeExecutor);
     NodeFactory.register(NodeType.CONVERSATION_MEMORY, ConversationMemoryNode);
+    NodeFactory.register(NodeType.FLOW_CALL, FlowCallNode);
 
     // Future node types will be registered here:
     // NodeFactory.register('VECTOR_UPDATE', VectorUpdateNodeExecutor);

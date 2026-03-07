@@ -47,6 +47,7 @@ export interface FlowExecutorConfig {
   logLevel: LogLevel;
   tempDir?: string;
   enableStreaming?: boolean;
+  flowLoader?: (flowId: string) => Promise<any>;
 }
 
 // Execution Status Types

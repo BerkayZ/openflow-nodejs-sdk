@@ -286,6 +286,7 @@ export class FlowValidator {
         "FOR_EACH",
         "UPDATE_VARIABLE",
         "CONDITION",
+        "FLOW_CALL",
       ];
 
       if (!node.type || !validTypes.includes(node.type)) {
@@ -418,6 +419,16 @@ export class FlowValidator {
           errors.push({
             path: `${nodePath}`,
             message: "CONDITION requires switch_value and branches",
+            code: ValidationErrorCode.MISSING_REQUIRED_FIELD,
+          });
+        }
+        break;
+
+      case "FLOW_CALL":
+        if (!node.config?.flow_id) {
+          errors.push({
+            path: `${nodePath}.config.flow_id`,
+            message: "FLOW_CALL node requires config.flow_id",
             code: ValidationErrorCode.MISSING_REQUIRED_FIELD,
           });
         }

@@ -18,6 +18,7 @@ export enum NodeType {
   UPDATE_VARIABLE = "UPDATE_VARIABLE",
   CONDITION = "CONDITION",
   CONVERSATION_MEMORY = "CONVERSATION_MEMORY",
+  FLOW_CALL = "FLOW_CALL",
 }
 
 export enum ValidationErrorCode {
